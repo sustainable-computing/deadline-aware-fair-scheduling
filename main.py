@@ -137,9 +137,7 @@ for t in range(0, len(P[0,:])):
 
     # now we need to define the EV charging power "evPower" for the next time-step
     # Available resource: 
-    A = np.zeros(33)
-    A[0] = ratings[0] - np.sum(P[:,t])
-    A = [ratings[i]-np.sum(P[i*55-55:i*55-1, t]) for i in range(1,evNumber)]
+    A = [ratings[i]-np.sum(P[i*55-55:i*55-1, t]) for i in range(0,evNumber)]
     
     # Truthful factors
 
