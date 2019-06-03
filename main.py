@@ -4,8 +4,11 @@ import scipy.io as spio
 import numpy as np
 import sys
 import GetTransCurrent
-# import GetTransPower
+import GetTransPower
 import RunPF
+import aux
+import primal
+import baseline
 # import pickle
 
 # the file that has the dss description:
@@ -20,7 +23,7 @@ P = mat['P']  # real power at the secondary nodes in kW
 Q = mat['Q']  # reactive power in kVar
 
 # Creating EVs
-evNumber = 1000  # number of EV owners in our network
+evNumber = 10  # number of EV owners in our network
 days = 7  # number of simulation days
 # GMMs for arrival times
 probArrival = [.6, .1, .3]
@@ -106,41 +109,89 @@ for d in range(1, days):
         if evClaimedDuration[d, e] < 1:
             evClaimedDuration[d, e] = 1
 
-# setting up the initial EV powers to zero, as we assume no EV is connected at the beginning of simulation
-evPower = np.zeros(evNumber)
+evArrival*=60
+evClaimedDuration*=60
+evDuration*=60
+
+# Remaining Demand:
+remain = np.zeros(shape=(days, evNumber))
+for i in range(0,days):
+    for j in range(0,evNumber):
+        remain[i][j] = (1.0 - evInitCharge[i][j]/100.0)*batterySize[evBatteryType[j]]
+remain*=60.0
+
+# Discrepancy:
+discrepancy = np.zeros(shape=(days, evNumber))
+for i in range(1, days):
+    for j in range(0, i):
+        discrepancy[i] += np.maximum(evDuration[j] - evClaimedDuration[j], 0.0)
+    discrepancy[i]/=i
+
+# Maximum Rate
+maxRate = remain
+
+# Laxity:
+Laxity = evClaimedDuration + discrepancy - remain/maxRate
+
+# Transformer ratings for each phase
+transRating=[2000,2000,2000,75,75,75,50,50,50,75,75,75,37.5,37.5,37.5,37.5,37.5,37.5,166.6666667,166.6666667,
+166.6666667,100,100,100,37.5,37.5,37.5,50,50,50,37.5,37.5,37.5,37.5,37.5,37.5,25,25,25,75,75,75,37.5,37.5,37.5,
+37.5,37.5,37.5,50,50,50,50,50,50,75,75,75,75,75,75,75,75,75,85,85,85,85,85,85,250,250,250,250,250,250,50,50,50,
+37.5,37.5,37.5,50,50,50,75,75,75,100,100,100,100,100,100,166.6666667,166.6666667,166.6666667,37.5,37.5,37.5]
+
+# Phase # for each load
+loadPhase =[1,2,1,1,1,2,2,3,1,2,2,3,2,1,2,3,3,3,3,1,1,1,2,3,1,2,3,3,1,1,1,3,3,1,2,2,2,2,3,2,2,3,3,2,2,1,3,1,1,2,1,1,2,1,1]
+
 timeStep = 60  # seconds
+d = days-1
+epsilon = 1e-8
 for t in range(0, len(P[0,:])):
     # Performing load flow for the first time step
+    evPower = np.zeros(evNumber)
     DSSCircuit = RunPF.runPF(DSSObj, P[:, t], Q[:, t], evNodeNumber, evPower)
 
-    # get the transformer current magnitudes
-    transCurrents = GetTransCurrent.getTransCurrent(DSSCircuit)
+    # get the transformer power magnitudes
+    transPowers = GetTransPower.getTransPower(DSSCircuit)
+    transPowers = np.ravel(transPowers)
+    
+    # Available Capacity: 
+    A = [transRating - 0*np.sqrt(transPowers[i]*transPowers[i]+transPowers[i+1]*transPowers[i+1]) for i in range(0,2,len(transPowers))]
+    A = np.ravel(A)
+
+    # Urgent EVs:
+    urgent = np.zeros(evNumber)
+    for i in range(0, evNumber):
+        if remain[d][i] > epsilon and evClaimedDuration[d][i] <= 1:
+            urgent[i] = 1
+    # Upper Bound:
+    UB = np.minimum(remain[d], maxRate[d])
     
     # build the evMatrix for the current time-step
     # (a more efficient way is to just update this at each time-step)
-    evMatrix = np.zeros(shape=(evNumber, len(transCurrents)))
+    evMatrix = np.zeros(shape=(evNumber, len(A)))
     # now we need to find which EVs are connected to the grid
+    currentTime = t  #min
     for e in range(0, evNumber):
-        currentTime = t*timeStep/3600  #hours
-        d = days-1
-        flag = 0
-        while flag == 0 and d >= 0:
-            if currentTime >= evArrival[d,e]:
-                flag = 1
-            else:
-                d -= 1
-        if d >= 0:
-            if currentTime-evArrival[d,e] <= evDuration[d,e]:
-                # this EV is connected
-                evMatrix[e, 0] = 1  # main transformer
-                evMatrix[e, evNodeNumber[e]//55+1] = 1  # secondary transformers
-
-    # now we need to define the EV charging power "evPower" for the next time-step
-    # Available resource: 
-    A = [ratings[i]-np.sum(P[i*55-55:i*55-1, t]) for i in range(0,evNumber)]
+        """
+            currentTime = t  #min
+            flag = 0
+            while flag == 0 and d >= 0:
+                if currentTime >= evArrival[d,e]:
+                    flag = 1
+                else:
+                    d -= 1
+            if d >= 0:
+        """
+        if currentTime-evArrival[d,e]>=0.0 and currentTime-evArrival[d,e]<=evDuration[d,e] and remain[d][e]>epsilon:
+            # this EV is connected
+            evMatrix[e, loadPhase[evNodeNumber[e]%55]-1] = 1  # main transformer
+            evMatrix[e, 3*(evNodeNumber[e]//55+1)+loadPhase[evNodeNumber[e]%55]-1] = 1  # secondary transformers
     
-    # Truthful factors
-
-
-
+    LB = epsilon + aux.solve(Laxity[d], urgent, 0.95, UB, A, evMatrix.T)
+    evPower = primal.solve(LB,UB,A,evMatrix.T)
+    evClaimedDuration-=1
+    remain-=evPower
+    #print(baseline.algo(Laxity[d],A,UB,evNodeNumber,loadPhase))
+    #sys.exit()
+    
 

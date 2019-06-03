@@ -54,15 +54,16 @@ def solve(LB,UB,A,T):
     return res.x
 ############################################################  
 
-########### Testing ##############
-# Problem:
-# maximize:    log x1 + log x2
-# subject to:  1.0 <= x1 <= 10.0
-#              3.0 <= x2 <= 8.0
-#              x1 + x2 <= 10.0 
-LB = [1.0,3.0]
-UB = [10.0,8.0]
-A = [10.0]
-T = [[1,1]]
+if __name__=="__main__":
+    ########### Testing ##############
+    # Problem:
+    # maximize:    log x1 + log x2
+    # subject to:  1.0 <= x1 <= 10.0
+    #              3.0 <= x2 <= 8.0
+    #              x1 + x2 <= 10.0 
+    LB = [1.0,3.0]
+    UB = [10.0,8.0]
+    A = [10.0]
+    T = [[1,1]]
 
-print(solve(LB,UB,A,T))
+    print(solve(LB,UB,A,T))

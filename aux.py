@@ -21,7 +21,7 @@ def w_update(laxity,urgent):
     laxity = np.asarray(laxity)
     urgent = np.asarray(urgent)
 
-    w = urgent*np.exp(-laxity)
+    w = urgent*np.exp(-(laxity/1000.0))
 ################################################
 
 ############## Objective Function ##########################
@@ -35,7 +35,7 @@ def obj(x):
 ############# Derivative of Objective Function #############
 def obj_der(x):
     global w
-    return w*np.reciprocal(-x)
+    return -w*np.reciprocal(x)
 ############################################################
 
 ############# Hessian of Objective Function ################
@@ -49,7 +49,7 @@ def solve(laxity,urgent,theta,UB,A,T):
     
     # Giving weights according to laxity and urgency
     w_update(laxity,urgent)
-    
+    print(w)
     # \epsilon lower bound
     LB = (1e-5)*np.ones(len(UB))
     
@@ -77,16 +77,17 @@ def solve(laxity,urgent,theta,UB,A,T):
     return urgent*res.x
 ############################################################  
 
-########### Testing ##############
-# Problem:
-# maximize:    log x1 + log x2
-# subject to:  1.0 <= x1 <= 10.0
-#              3.0 <= x2 <= 8.0
-#              x1 + x2 <= 10.0 
+if __name__=="__main__":
+    ########### Testing ##############
+    # Problem:
+    # maximize:    log x1 + log x2
+    # subject to:  1.0 <= x1 <= 10.0
+    #              3.0 <= x2 <= 8.0
+    #              x1 + x2 <= 10.0 
 
-urgent = [1,0]
-laxity = [-2,1]
-UB = [10.0,8.0]
-A = [10.0]
-T = [[1,1]]
-print(solve(laxity,urgent,0.95,UB,A,T))
+    urgent = [1,0]
+    laxity = [-2,1]
+    UB = [10.0,8.0]
+    A = [10.0]
+    T = [[1,1]]
+    print(solve(laxity,urgent,0.95,UB,A,T))
