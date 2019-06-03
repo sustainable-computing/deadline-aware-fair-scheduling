@@ -189,8 +189,8 @@ for t in range(0, len(P[0,:])):
     
     LB = epsilon + aux.solve(Laxity[d], urgent, 0.95, UB, A, evMatrix.T)
     evPower = primal.solve(LB,UB,A,evMatrix.T)
-    evClaimedDuration-=1
-    remain-=evPower
+    evClaimedDuration[d]-=1
+    remain[d]-=evPower
     #print(baseline.algo(Laxity[d],A,UB,evNodeNumber,loadPhase))
     #sys.exit()
     
