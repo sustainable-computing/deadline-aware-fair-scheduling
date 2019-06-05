@@ -6,6 +6,7 @@ import numpy as np
 import sys
 import GetTransPower
 import RunPF
+from tqdm import tqdm
 
 DSSObj, mat, env = util.load(sys.argv)
 
@@ -17,7 +18,8 @@ Q = mat['Q']  # reactive power in kVar
 d = 0
 epsilon = 1e-8
 evPower = np.zeros(env.var['evNumber'])
-for t in range(1000, len(P[0,:])):
+allEVpower = {}
+for t in tqdm(range(1000, 1060)):
     # Performing load flow for the first time step
     DSSCircuit = RunPF.runPF(DSSObj, P[:, t], Q[:, t], env.var['evNodeNumber'], 0*evPower)
 
@@ -43,5 +45,7 @@ for t in range(1000, len(P[0,:])):
     x = primal.solve(LB,UB,A,evMatrix)
     for c in range(0, l):
         evPower[connected[c]] = x[c]
-    
+    allEVpower[t] = evPower
+    print(evPower)
+np.save('central', allEVpower)
 

@@ -18,17 +18,17 @@ epsilon = util.epsilon
 # We are posing the problem as a minimization task
 # So taking negative of logarithm:
 def obj(x):
-    return -np.sum(np.log(x+epsilon))
+    return -np.sum(util.log(x))
 ############################################################
 
 ############# Derivative of Objective Function #############
 def obj_der(x):
-    return -np.reciprocal(x+epsilon)
+    return -util.reciprocal(x)
 ############################################################
 
 ############# Hessian of Objective Function ################
 def obj_hess(x):
-    return np.diag(np.reciprocal((x+epsilon)*(x+epsilon)))
+    return np.diag(util.reciprocal(x*x))
 ############################################################
 
 ######################## Solving ###########################
@@ -51,7 +51,7 @@ def solve(LB,UB,A,T):
     res = minimize(obj, x0, method='trust-constr', 
                    jac=obj_der, hess=obj_hess, 
                    constraints=[linear_constraint], 
-                   options={'verbose': 1}, bounds=bounds)
+                   options={'maxiter': 101}, bounds=bounds)
     ########################################################
 
     return res.x

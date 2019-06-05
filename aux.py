@@ -24,7 +24,7 @@ def w_update(laxity,urgent):
     laxity = np.asarray(laxity)
     urgent = np.asarray(urgent)
 
-    w = urgent*np.exp(-(laxity/100.0))
+    w = urgent*util.f(-laxity)
 ################################################
 
 ############## Objective Function ##########################
@@ -32,19 +32,19 @@ def w_update(laxity,urgent):
 # So taking negative of logarithm:
 def obj(x):
     global w
-    return -np.sum(w*np.log(x+epsilon))
+    return -np.sum(w*util.log(x))
 ############################################################
 
 ############# Derivative of Objective Function #############
 def obj_der(x):
     global w
-    return -w*np.reciprocal(x+epsilon)
+    return -w*util.reciprocal(x)
 ############################################################
 
 ############# Hessian of Objective Function ################
 def obj_hess(x):
     global w
-    return np.diag(w*np.reciprocal((x+epsilon)*(x+epsilon)))
+    return np.diag(w*util.reciprocal(x*x))
 ############################################################
 
 ######################## Solving ###########################
@@ -73,7 +73,7 @@ def solve(laxity,urgent,theta,UB,A,T):
     res = minimize(obj, x0, method='trust-constr', 
                    jac=obj_der, hess=obj_hess, 
                    constraints=[linear_constraint], 
-                   options={'gtol': 1e-8, 'verbose': 1}, bounds=bounds)
+                   options={'maxiter': 101}, bounds=bounds)
     ########################################################
 
     return urgent*res.x

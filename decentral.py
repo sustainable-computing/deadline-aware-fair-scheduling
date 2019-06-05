@@ -5,7 +5,7 @@ import numpy as np
 import sys
 import GetTransPower
 import RunPF
-
+from tqdm import tqdm
 
 DSSObj, mat, env = util.load(sys.argv)
 
@@ -20,18 +20,18 @@ tol=1e-3
 
 maxIteration=2000
 
-gamma1 = 0.0001
-gamma2 = 0.0001
-theta = 0.95
+gamma1 = 1e-10
+gamma2 = 1e-10
+theta = 0.8
 
 evPower = np.zeros(env.var['evNumber'])
 lamda = np.zeros(99)
 mu = np.zeros(99)
-
-for t in range(1000, len(P[0,:])):
+allEVpower = {}
+for t in tqdm(range(1000, 1060)):
     
-    lamda*=0
-    mu*=0
+    lamda=np.random.rand(len(lamda))
+    mu=np.random.rand(len(mu))
     
     # Performing load flow for the first time step
     DSSCircuit = RunPF.runPF(DSSObj, P[:, t], Q[:, t], env.var['evNodeNumber'], 0*evPower)
@@ -43,7 +43,7 @@ for t in range(1000, len(P[0,:])):
     
     # Available Capacity: 
     A = [env.var['transRating'][i>>1] - np.sqrt(transPowers[i]*transPowers[i]+transPowers[i+1]*transPowers[i+1]) for i in range(0,len(transPowers),2)]
-    A = np.ravel(A)
+    A = np.maximum(0.0, np.ravel(A))
 
     connected, urgent, laxity, evMatrix = env.update(d,t,evPower)
     evPower*=0
@@ -53,23 +53,28 @@ for t in range(1000, len(P[0,:])):
     # Upper Bound:
     UB = np.minimum(env.var['remainingDemand'], env.var['maxRate'])
     UB = [UB[c] for c in connected]
-
+    
     x = np.zeros(l)
     prevX = x
     y = np.zeros(l)
     for s in range(maxIteration):
         direction = np.dot(evMatrix, x)
-        lamda = np.maximum(epsilon,lamda - gamma1*(A-direction))
-        mu = np.maximum(epsilon, mu - gamma2*(theta*A-direction))
         
+        lamda = np.maximum(0.0,lamda - gamma1*(A-direction))
+        mu = np.maximum(0.0, mu - gamma2*(theta*A-direction))
+        #print(lamda)
         direction = np.dot(evMatrix.T, mu)
         aux.w_update(laxity, urgent)
-        y = np.minimum(np.maximum(epsilon, aux.w*np.reciprocal(direction)), UB)
+        y = np.minimum(aux.w*util.reciprocal(direction), UB)
         
         direction = np.dot(evMatrix.T, lamda)
-        x = np.minimum(np.maximum(y, np.reciprocal(direction)), UB)
-        if np.linalg.norm(prevX-x) <= tol:
-            break
+        x = np.minimum(np.maximum(y, util.reciprocal(direction)), UB)
+        #if np.linalg.norm(prevX-x) <= tol:
+        #    break
         prevX = x
+        
     for c in range(0, l):
         evPower[connected[c]] = x[c]
+    #print(evPower)
+    allEVpower[t] = evPower
+np.save('decentral', allEVpower)
