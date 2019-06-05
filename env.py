@@ -16,9 +16,9 @@ class env:
         self.var['days'] = days
         
         # GMMs for arrival times
-        probArrival = [.6, .1, .3]
-        meanArrival = [8, 13, 18]
-        stdArrival = [1, 2, 1]
+        probArrival = [.016, .244, .037, .064, .135, .454, .05]
+        meanArrival = [0, 2.5, 7.4, 8.5, 12.28, 18.4, 22.21]
+        stdArrival = [.09, 2.38, .9, 1.6, 1.4, 2.38, .35]
         
         self.var['probArrival '] = probArrival 
         self.var['meanArrival'] = meanArrival
@@ -41,10 +41,18 @@ class env:
             rnd = np.random.rand(1)
             if rnd < probArrival[0]:
                 evGaussian[e] = 0
-            elif rnd < probArrival[0]+probArrival[1]:
+            elif rnd < sum(probArrival[0:2]):
                 evGaussian[e] = 1
-            else:
+            elif rnd < sum(probArrival[0:3]):
                 evGaussian[e] = 2
+            elif rnd < sum(probArrival[0:4]):
+                evGaussian[e] = 3
+            elif rnd < sum(probArrival[0:5]):
+                evGaussian[e] = 4
+            elif rnd < sum(probArrival[0:6]):
+                evGaussian[e] = 5
+            else:
+                evGaussian[e] = 6
                 
         self.var['evGaussian'] = evGaussian
 
@@ -66,7 +74,7 @@ class env:
         evDriverType = np.random.randint(0, 3, evNumber)
         self.var['evDriverType'] = evDriverType
         
-        evDriverStd = [.17, .75, 1]
+        evDriverStd = [0, .75, 1]
         self.var['evDriverStd'] = evDriverStd
 
         # initial charge of each EV at the time connection in percentage
