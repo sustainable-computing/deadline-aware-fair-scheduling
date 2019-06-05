@@ -1,4 +1,5 @@
 import numpy as np
+import util
 from scipy.optimize import minimize
 from scipy.optimize import Bounds
 from scipy.optimize import LinearConstraint
@@ -11,21 +12,23 @@ from scipy.optimize import LinearConstraint
 #and, A is the available resource vector
 ############################################
 
+epsilon = util.epsilon
+
 ############## Objective Function ##########################
 # We are posing the problem as a minimization task
 # So taking negative of logarithm:
 def obj(x):
-    return -np.sum(np.log(x))
+    return -np.sum(np.log(x+epsilon))
 ############################################################
 
 ############# Derivative of Objective Function #############
 def obj_der(x):
-    return np.reciprocal(-x)
+    return -np.reciprocal(x+epsilon)
 ############################################################
 
 ############# Hessian of Objective Function ################
 def obj_hess(x):
-    return np.diag(np.reciprocal(x*x))
+    return np.diag(np.reciprocal((x+epsilon)*(x+epsilon)))
 ############################################################
 
 ######################## Solving ###########################

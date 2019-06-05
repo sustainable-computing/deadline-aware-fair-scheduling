@@ -1,4 +1,5 @@
 import numpy as np
+import util
 from scipy.optimize import minimize
 from scipy.optimize import Bounds
 from scipy.optimize import LinearConstraint
@@ -13,6 +14,8 @@ from scipy.optimize import LinearConstraint
 # urgent users
 ############################################
 
+epsilon = util.epsilon
+
 ############### Updating Weights ###############
 w = np.array([])
 def w_update(laxity,urgent):
@@ -21,7 +24,7 @@ def w_update(laxity,urgent):
     laxity = np.asarray(laxity)
     urgent = np.asarray(urgent)
 
-    w = urgent*np.exp(-(laxity/1000.0))
+    w = urgent*np.exp(-(laxity/100.0))
 ################################################
 
 ############## Objective Function ##########################
@@ -29,19 +32,19 @@ def w_update(laxity,urgent):
 # So taking negative of logarithm:
 def obj(x):
     global w
-    return -np.sum(w*np.log(x))
+    return -np.sum(w*np.log(x+epsilon))
 ############################################################
 
 ############# Derivative of Objective Function #############
 def obj_der(x):
     global w
-    return -w*np.reciprocal(x)
+    return -w*np.reciprocal(x+epsilon)
 ############################################################
 
 ############# Hessian of Objective Function ################
 def obj_hess(x):
     global w
-    return np.diag(w*np.reciprocal(x*x))
+    return np.diag(w*np.reciprocal((x+epsilon)*(x+epsilon)))
 ############################################################
 
 ######################## Solving ###########################
@@ -49,10 +52,9 @@ def solve(laxity,urgent,theta,UB,A,T):
     
     # Giving weights according to laxity and urgency
     w_update(laxity,urgent)
-    print(w)
+
     # \epsilon lower bound
-    LB = (1e-5)*np.ones(len(UB))
-    
+    LB = np.zeros(len(UB))
     ##################### Optimization Variables ###########
     # LB <= x <= UB
     bounds = Bounds(LB, UB)
@@ -71,7 +73,7 @@ def solve(laxity,urgent,theta,UB,A,T):
     res = minimize(obj, x0, method='trust-constr', 
                    jac=obj_der, hess=obj_hess, 
                    constraints=[linear_constraint], 
-                   options={'verbose': 1}, bounds=bounds)
+                   options={'gtol': 1e-8, 'verbose': 1}, bounds=bounds)
     ########################################################
 
     return urgent*res.x
