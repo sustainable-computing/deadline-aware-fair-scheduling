@@ -28,10 +28,10 @@ evPower = np.zeros(env.var['evNumber'])
 lamda = np.zeros(99)
 mu = np.zeros(99)
 allEVpower = {}
-for t in tqdm(range(1000, 1060)):
+for t in tqdm(range(0, 60)):
     
-    lamda=np.random.rand(len(lamda))
-    mu=np.random.rand(len(mu))
+    lamda*=0
+    mu*=0
     
     # Performing load flow for the first time step
     DSSCircuit = RunPF.runPF(DSSObj, P[:, t], Q[:, t], env.var['evNodeNumber'], 0*evPower)
@@ -57,7 +57,18 @@ for t in tqdm(range(1000, 1060)):
     x = np.zeros(l)
     prevX = x
     y = np.zeros(l)
-    for s in range(maxIteration):
+    for s in range(100):
+        DSSCircuit = RunPF.runPF(DSSObj, P[:, t], Q[:, t], env.var['evNodeNumber'], evPower)
+
+        # get the transformer power magnitudes
+        transPowers = GetTransPower.getTransPower(DSSCircuit)
+        
+        transPowers = np.ravel(transPowers)
+        
+        # Available Capacity: 
+        A = [env.var['transRating'][i>>1] - np.sqrt(transPowers[i]*transPowers[i]+transPowers[i+1]*transPowers[i+1]) for i in range(0,len(transPowers),2)]
+        A = np.maximum(0.0, np.ravel(A))
+        
         direction = np.dot(evMatrix, x)
         
         lamda = np.maximum(0.0,lamda - gamma1*(A-direction))
@@ -72,9 +83,13 @@ for t in tqdm(range(1000, 1060)):
         #if np.linalg.norm(prevX-x) <= tol:
         #    break
         prevX = x
+        for c in range(0, l):
+            evPower[connected[c]] += x[c]
+        _,_,_,_ = env.update(d,t,evPower)
+        UB = np.minimum(env.var['remainingDemand'], env.var['maxRate'])
+        UB = [UB[c] for c in connected]
+        #print(env.var['remainingDemand'])
         
-    for c in range(0, l):
-        evPower[connected[c]] = x[c]
-    #print(evPower)
+    print(evPower)
     allEVpower[t] = evPower
 np.save('decentral', allEVpower)
