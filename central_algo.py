@@ -1,35 +1,29 @@
-from algo import algo 
-import numpy as np
-import LB
-import primal
+from algo import algo
+import numpy as np, lower_bound as lb, primal, sys
 
 class central_algo(algo):
+
     def update(self):
-        theta = 0.9
         connected = self.get_connected()
-        LB_ = np.zeros(len(connected))
-        
+        LB = np.zeros(len(connected))
         urgent = self.get_urgent(connected)
-        if len(urgent)>0:
-            available = self.get_available(self.get_trans_load(np.zeros(self.env['evNumber'])))
-            T, A = self.get_TA(urgent, available)
-            
-            lb = LB.solve(self.get_laxity(urgent), theta, A, T)
-            for i in range(0, len(connected)):
-                for j in range(0, len(urgent)):
-                    if connected[i]==urgent[j]:
-                        LB_[i] = lb[j]
-        if len(connected)>0:
-            available = self.get_available(self.get_trans_load(np.zeros(self.env['evNumber'])))
-            T, A = self.get_TA(connected, available)
-            
-            x = primal.solve(LB_,self.get_UB(connected),A,T)
+        if len(urgent) > 0:
+            T, A = self.get_TA(urgent)
+            ur_LB = lb.solve(self.get_laxity(urgent), self.params['theta'], self.get_UB(urgent), A, T)
+            for i in range(0, len(urgent)):
+                j, = np.where(connected == urgent[i])
+                LB[j[0]] = ur_LB[i]
+
+        if len(connected) > 0:
+            T, A = self.get_TA(connected)
+            x = primal.solve(LB, self.get_UB(connected), A, T)
         ev_power = np.zeros(self.env['evNumber'])
         for i in range(0, len(connected)):
             ev_power[connected[i]] = x[i]
-            
-        self.update_remaining_demand(ev_power, self.time_unit_in_sec)
-        self.current_time+=self.time_unit_in_sec
 
-        return (self.get_trans_load(ev_power), ev_power)
-            
+        self.update_remaining_demand(ev_power, self.time_unit_in_sec)
+        self.current_time += self.time_unit_in_sec
+        result = {'trans_load':self.get_trans_load(ev_power).tolist(), 
+         'ev_power':ev_power.tolist(),  'remaining_demand':self.remaining_demand.tolist()}
+        return result
+
