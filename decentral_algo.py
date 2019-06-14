@@ -25,15 +25,17 @@ class decentral_algo(algo):
             L = np.amax(np.sum(T, axis=0))
             S = np.amax(np.sum(T, axis=1))
             
-            gamma = 20.0/(m*L*S+util.tol)
+            gamma = 0.05/(m*L*S+util.tol)
             
-            lamda = np.zeros(len(A))
+            #lamda = np.zeros(len(A))
+            lamda = 0.1*np.ones(len(A))
             x = np.zeros(len(connected))
             
             
             for i in range(0, self.params['max_iter']):
                 x = np.minimum(np.maximum(LB, 1.0/(np.dot(T.T, lamda)+util.tol)), self.get_UB(connected))
-                #lamda = np.maximum(0.0, lamda - gamma*(A-np.dot(T,x)))
+                lamda = np.maximum(0.0, lamda - gamma*(A-np.dot(T,x)))
+                """
                 ev_power = np.zeros(self.env['evNumber'])
                 for i in range(0, len(connected)):
                     ev_power[connected[i]] = x[i]
@@ -42,7 +44,7 @@ class decentral_algo(algo):
                 g = np.array([g[e] for e in A_i])
                 
                 lamda = np.maximum(0.0, lamda - gamma*g)
-
+                """
         ev_power = np.zeros(self.env['evNumber'])
         for i in range(0, len(connected)):
             ev_power[connected[i]] = x[i]

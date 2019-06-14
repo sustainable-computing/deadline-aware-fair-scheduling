@@ -130,6 +130,6 @@ def soc_vs_time(result_path, usr_type, algo, slot=60):
 
 
 if __name__ == '__main__':
-    env = load_dict('env/test.txt')
+    env = load_dict('env/static.txt')
     #soc_vs_time('result/test.txt', (env['evDriverType']), algo='decentral')
-    y_vs_time('result/test_constant.txt', trans=25, slot=60, env=env)
+    y_vs_time('result/static.txt', trans=1, slot=60, env=env)

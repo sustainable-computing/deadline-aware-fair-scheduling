@@ -10,17 +10,19 @@ from base_algo import base_algo
 
 DSSObj, mat, env = util.load(sys.argv)
 
+mode = 'constant'
+
 result = {}
-central_obj = central_algo(DSSObj, mat, env, start=1400, mode='constant', params={'theta':0.8})
+central_obj = central_algo(DSSObj, mat, env, start=1400, mode=mode, params={'theta':0.8})
 result['central'] = {}
 
-decentral_obj = decentral_algo(DSSObj, mat, env,start=1400, mode='constant', params={'theta':0.8, 'max_iter':200})
+decentral_obj = decentral_algo(DSSObj, mat, env,start=1400, mode=mode, params={'theta':0.8, 'max_iter':3000})
 result['decentral'] = {}
 
-llf_obj = base_algo(DSSObj, mat, env,start=1400, mode='constant', params={'value':'llf'})
+llf_obj = base_algo(DSSObj, mat, env,start=1400, mode=mode, params={'value':'llf'})
 result['llf'] = {}
 
-edf_obj = base_algo(DSSObj, mat, env,start=1400, mode='constant', params={'value':'edf'})
+edf_obj = base_algo(DSSObj, mat, env,start=1400, mode=mode, params={'value':'edf'})
 result['edf'] = {}
 
 #base_load_obj = algo(DSSObj, mat, env)
@@ -33,4 +35,4 @@ for t in tqdm(range(1400, 1439)):
     result['edf'][t] = edf_obj.update()
     result['base_load'][t] = {'trans_load':central_obj.get_trans_load(np.zeros(env['evNumber'])).tolist()}
     
-util.save_dict('result/test_constant.txt', result)
+util.save_dict('result/static.txt', result)

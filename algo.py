@@ -13,7 +13,7 @@ class algo:
         self.params = params
         
         self.start = start*time_unit_in_sec
-        self.current_time = start
+        self.current_time = self.start
         self.time_unit_in_sec = time_unit_in_sec
         self.time_factor = 3600.0/self.time_unit_in_sec
         
