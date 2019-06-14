@@ -11,7 +11,7 @@ class decentral_algo(algo):
         
         urgent = self.get_urgent(connected)
         if len(urgent)>0:
-            T, A = self.get_TA(urgent)
+            T, A, _ = self.get_TA(urgent)
             ur_LB = lb.solve(self.get_laxity(urgent), self.params['theta'], self.get_UB(urgent), A, T)
             
             for i in range(0, len(urgent)):
@@ -19,7 +19,7 @@ class decentral_algo(algo):
                 LB[j[0]] = ur_LB[i]
 
         if len(connected)>0:
-            T, A = self.get_TA(connected)
+            T, A, A_i = self.get_TA(connected)
             
             m  = (np.amax(self.get_UB(connected)))**2
             L = np.amax(np.sum(T, axis=0))
@@ -33,7 +33,15 @@ class decentral_algo(algo):
             
             for i in range(0, self.params['max_iter']):
                 x = np.minimum(np.maximum(LB, 1.0/(np.dot(T.T, lamda)+util.tol)), self.get_UB(connected))
-                lamda = np.maximum(0.0, lamda - gamma*(A-np.dot(T,x)))
+                #lamda = np.maximum(0.0, lamda - gamma*(A-np.dot(T,x)))
+                ev_power = np.zeros(self.env['evNumber'])
+                for i in range(0, len(connected)):
+                    ev_power[connected[i]] = x[i]
+                    
+                g = self.env['transRating'] - self.get_trans_load(ev_power)
+                g = np.array([g[e] for e in A_i])
+                
+                lamda = np.maximum(0.0, lamda - gamma*g)
 
         ev_power = np.zeros(self.env['evNumber'])
         for i in range(0, len(connected)):

@@ -72,6 +72,7 @@ class algo:
     def get_TA(self, connected):
         T = []
         A = []
+        A_i = []
         trans_number = [self.env['evNodeNumber'][e]//55+1 for e in connected]
         phase_number = [self.env['loadPhase'][self.env['evNodeNumber'][e]%55]-1 for e in connected]
         
@@ -85,6 +86,7 @@ class algo:
             if np.sum(temp)>0:
                 T.append(temp)
                 A.append(available[i])
+                A_i.append(i)
         
         # For secondary transformers
         for i in range(3, len(available)):
@@ -95,9 +97,10 @@ class algo:
             if np.sum(temp)>0:
                 T.append(temp)
                 A.append(available[i])
+                A_i.append(i)
         A = np.array(A)
         A = np.maximum(util.tol, A)
-        return (np.array(T), A)
+        return (np.array(T), A, A_i)
             
     def update(self):
         # Write codes for update in each time slot

@@ -8,14 +8,14 @@ class central_algo(algo):
         LB = np.zeros(len(connected))
         urgent = self.get_urgent(connected)
         if len(urgent) > 0:
-            T, A = self.get_TA(urgent)
+            T, A, _ = self.get_TA(urgent)
             ur_LB = lb.solve(self.get_laxity(urgent), self.params['theta'], self.get_UB(urgent), A, T)
             for i in range(0, len(urgent)):
                 j, = np.where(connected == urgent[i])
                 LB[j[0]] = ur_LB[i]
 
         if len(connected) > 0:
-            T, A = self.get_TA(connected)
+            T, A, _ = self.get_TA(connected)
             x = primal.solve(LB, self.get_UB(connected), A, T)
         ev_power = np.zeros(self.env['evNumber'])
         for i in range(0, len(connected)):

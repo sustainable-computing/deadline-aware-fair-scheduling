@@ -69,6 +69,8 @@ def y_vs_time(result_path, trans, slot=60, env=None):
     legend.append('rating')
     plt.plot(x,y,'--',linewidth=linewidth)
     for key in result:
+        #if key=='llf' or key=='edf':
+        #    continue
         y = []
         legend.append(key)
         for i in x:
@@ -130,4 +132,4 @@ def soc_vs_time(result_path, usr_type, algo, slot=60):
 if __name__ == '__main__':
     env = load_dict('env/test.txt')
     #soc_vs_time('result/test.txt', (env['evDriverType']), algo='decentral')
-    y_vs_time('result/test.txt', trans=0, slot=60, env=env)
+    y_vs_time('result/test_constant.txt', trans=25, slot=60, env=env)
