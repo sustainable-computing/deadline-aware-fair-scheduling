@@ -4,13 +4,15 @@ import GetTransPower
 import RunPF
 
 class algo:
-    def __init__(self, DSSObj, mat, env, time_unit_in_sec=60, start=0, params={}):
+    def __init__(self, DSSObj, mat, env, time_unit_in_sec=60, start=0, mode='change', params={}):
         self.DSSObj = DSSObj
         self.P = mat['P']
         self.Q = mat['Q']
         self.env = env
+        self.mode = mode
         self.params = params
         
+        self.start = start*time_unit_in_sec
         self.current_time = start
         self.time_unit_in_sec = time_unit_in_sec
         self.time_factor = 3600.0/self.time_unit_in_sec
@@ -47,11 +49,11 @@ class algo:
     def update_remaining_demand(self, ev_power, time_in_sec):
         self.remaining_demand = np.maximum(0.0, self.remaining_demand-ev_power*time_in_sec)
         
-    def get_trans_load(self, ev_power, constant=None): # In kVA
-        if constant==None:
+    def get_trans_load(self, ev_power): # In kVA
+        if self.mode=='change':
             DSSCircuit = RunPF.runPF(self.DSSObj, self.P[:, self.current_time], self.Q[:, self.current_time], self.env['evNodeNumber'], ev_power)
-        else:
-            DSSCircuit = RunPF.runPF(self.DSSObj, self.P[:, constant], self.Q[:, constant], self.env['evNodeNumber'], ev_power)
+        elif self.mode=='constant':
+            DSSCircuit = RunPF.runPF(self.DSSObj, self.P[:, self.start], self.Q[:, self.start], self.env['evNodeNumber'], ev_power)
 
         # get the transformer power magnitudes
         trans_loads = GetTransPower.getTransPower(DSSCircuit)
