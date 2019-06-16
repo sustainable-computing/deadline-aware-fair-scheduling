@@ -22,8 +22,14 @@ class central_algo(algo):
             ev_power[connected[i]] = x[i]
 
         self.update_remaining_demand(ev_power, self.time_unit_in_sec)
-        self.current_time += self.time_unit_in_sec
-        result = {'trans_load':self.get_trans_load(ev_power).tolist(), 
-         'ev_power':ev_power.tolist(),  'remaining_demand':self.remaining_demand.tolist()}
+        result = {'trans_load':self.get_trans_load(ev_power).tolist(), 'ev_power':ev_power.tolist(), 'remaining_demand':self.remaining_demand.tolist()}
+        self.current_time+=self.time_unit_in_sec
+        #print('central')
+        #print(result['ev_power'])
+        if len(connected)>0:
+            t,a,_=self.get_TA([],whole=1)
+            print('central')
+            print(np.dot(t,ev_power))
+            #print(a)
         return result
 

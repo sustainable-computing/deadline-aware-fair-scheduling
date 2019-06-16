@@ -25,10 +25,11 @@ class decentral_algo(algo):
             L = np.amax(np.sum(T, axis=0))
             S = np.amax(np.sum(T, axis=1))
             
-            gamma = 0.05/(m*L*S+util.tol)
-            
-            #lamda = np.zeros(len(A))
-            lamda = 0.1*np.ones(len(A))
+            gamma = 500000.0/(m*L*S+util.tol)
+            #print('gamma')
+            #print(gamma)
+            lamda = np.zeros(len(A))
+            #lamda = 0.1*np.ones(len(A))
             x = np.zeros(len(connected))
             
             
@@ -49,9 +50,12 @@ class decentral_algo(algo):
         for i in range(0, len(connected)):
             ev_power[connected[i]] = x[i]
             
+            
         self.update_remaining_demand(ev_power, self.time_unit_in_sec)
+        result = {'trans_load':self.get_trans_load(ev_power).tolist(), 'ev_power':ev_power.tolist(), 'remaining_demand':self.remaining_demand.tolist()}
         self.current_time+=self.time_unit_in_sec
         
-        result = {'trans_load':self.get_trans_load(ev_power).tolist(), 'ev_power':ev_power.tolist(), 'remaining_demand':self.remaining_demand.tolist()}
+        #print('decentral')
+        #print(result['ev_power'])
         return result
             

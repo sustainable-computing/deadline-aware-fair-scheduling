@@ -16,6 +16,8 @@ class base_algo(algo):
         power = np.zeros(len(value))
         B = np.copy(A)
         order = self.sort(connected, value)
+        #print(self.params['value'])
+        #print(order)
         for i in range(0,len(value)):
             index = order[i][0]
             j=phase[evNode[index]%55]-1
@@ -51,8 +53,13 @@ class base_algo(algo):
             ev_power[connected[i]] = x[i]
             
         self.update_remaining_demand(ev_power, self.time_unit_in_sec)
-        self.current_time+=self.time_unit_in_sec
-
         result = {'trans_load':self.get_trans_load(ev_power).tolist(), 'ev_power':ev_power.tolist(), 'remaining_demand':self.remaining_demand.tolist()}
+        self.current_time+=self.time_unit_in_sec
+        
+        if self.params['value']=='edf' and len(connected)>0:
+            t,a,_=self.get_TA([],whole=1)
+            print('edf')
+            print(np.dot(t,ev_power))
+            #print(a)
         return result
             

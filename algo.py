@@ -69,7 +69,9 @@ class algo:
         temp = np.maximum(util.tol, temp)
         return np.array([temp[e] for e in connected])
         
-    def get_TA(self, connected):
+    def get_TA(self, connected, whole=0):
+        if whole==1:
+            connected = np.array(range(0,self.env['evNumber']))
         T = []
         A = []
         A_i = []
@@ -83,7 +85,7 @@ class algo:
             for j in range(0, len(connected)):
                 if phase_number[j]==i:
                     temp[j] = 1
-            if np.sum(temp)>0:
+            if np.sum(temp)>0 or whole==1:
                 T.append(temp)
                 A.append(available[i])
                 A_i.append(i)
@@ -94,7 +96,7 @@ class algo:
             for j in range(0, len(connected)):
                 if trans_number[j]==(i//3) and phase_number[j]==(i%3):
                     temp[j] = 1
-            if np.sum(temp)>0:
+            if np.sum(temp)>0 or whole==1:
                 T.append(temp)
                 A.append(available[i])
                 A_i.append(i)
