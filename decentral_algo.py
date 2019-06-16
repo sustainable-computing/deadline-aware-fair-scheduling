@@ -11,7 +11,7 @@ class decentral_algo(algo):
         
         urgent = self.get_urgent(connected)
         if len(urgent)>0:
-            T, A, _ = self.get_TA(urgent)
+            T, A, _ = self.get_TAU(urgent)
             ur_LB = lb.solve(self.get_laxity(urgent), self.params['theta'], self.get_UB(urgent), A, T)
             
             for i in range(0, len(urgent)):
@@ -19,7 +19,7 @@ class decentral_algo(algo):
                 LB[j[0]] = ur_LB[i]
 
         if len(connected)>0:
-            T, A, A_i = self.get_TA(connected)
+            T, A, U = self.get_TAU(connected)
             
             m  = (np.amax(self.get_UB(connected)))**2
             L = np.amax(np.sum(T, axis=0))
@@ -42,7 +42,7 @@ class decentral_algo(algo):
                     ev_power[connected[i]] = x[i]
                     
                 g = self.env['transRating'] - self.get_trans_load(ev_power)
-                g = np.array([g[e] for e in A_i])
+                g = np.array([g[e] for e in U])
                 
                 lamda = np.maximum(0.0, lamda - gamma*g)
                 """

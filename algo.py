@@ -69,12 +69,12 @@ class algo:
         temp = np.maximum(util.tol, temp)
         return np.array([temp[e] for e in connected])
         
-    def get_TA(self, connected, whole=0):
+    def get_TAU(self, connected, whole=0):
         if whole==1:
             connected = np.array(range(0,self.env['evNumber']))
         T = []
         A = []
-        A_i = []
+        U = []
         trans_number = [self.env['evNodeNumber'][e]//55+1 for e in connected]
         phase_number = [self.env['loadPhase'][self.env['evNodeNumber'][e]%55]-1 for e in connected]
         
@@ -88,7 +88,7 @@ class algo:
             if np.sum(temp)>0 or whole==1:
                 T.append(temp)
                 A.append(available[i])
-                A_i.append(i)
+                U.append(i)
         
         # For secondary transformers
         for i in range(3, len(available)):
@@ -99,10 +99,10 @@ class algo:
             if np.sum(temp)>0 or whole==1:
                 T.append(temp)
                 A.append(available[i])
-                A_i.append(i)
+                U.append(i)
         A = np.array(A)
         A = np.maximum(util.tol, A)
-        return (np.array(T), A, A_i)
+        return (np.array(T), A, np.array(U))
             
     def update(self):
         # Write codes for update in each time slot

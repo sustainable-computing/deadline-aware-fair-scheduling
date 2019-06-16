@@ -16,12 +16,13 @@ class base_algo(algo):
         power = np.zeros(len(value))
         B = np.copy(A)
         order = self.sort(connected, value)
-        #print(self.params['value'])
-        #print(order)
+        
         for i in range(0,len(value)):
             index = order[i][0]
+            
             j=phase[evNode[index]%55]-1
             k=3*(evNode[index]//55+1)+j
+            
             if B[j]>=UB[i] and B[k]>=UB[i]:
                 power[i]=UB[i]
             else:
@@ -56,10 +57,5 @@ class base_algo(algo):
         result = {'trans_load':self.get_trans_load(ev_power).tolist(), 'ev_power':ev_power.tolist(), 'remaining_demand':self.remaining_demand.tolist()}
         self.current_time+=self.time_unit_in_sec
         
-        if self.params['value']=='edf' and len(connected)>0:
-            t,a,_=self.get_TA([],whole=1)
-            print('edf')
-            print(np.dot(t,ev_power))
-            #print(a)
         return result
             

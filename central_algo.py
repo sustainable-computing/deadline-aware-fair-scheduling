@@ -8,14 +8,14 @@ class central_algo(algo):
         LB = np.zeros(len(connected))
         urgent = self.get_urgent(connected)
         if len(urgent) > 0:
-            T, A, _ = self.get_TA(urgent)
+            T, A, _ = self.get_TAU(urgent)
             ur_LB = lb.solve(self.get_laxity(urgent), self.params['theta'], self.get_UB(urgent), A, T)
             for i in range(0, len(urgent)):
                 j, = np.where(connected == urgent[i])
                 LB[j[0]] = ur_LB[i]
 
         if len(connected) > 0:
-            T, A, _ = self.get_TA(connected)
+            T, A, _ = self.get_TAU(connected)
             x = primal.solve(LB, self.get_UB(connected), A, T)
         ev_power = np.zeros(self.env['evNumber'])
         for i in range(0, len(connected)):
@@ -24,12 +24,6 @@ class central_algo(algo):
         self.update_remaining_demand(ev_power, self.time_unit_in_sec)
         result = {'trans_load':self.get_trans_load(ev_power).tolist(), 'ev_power':ev_power.tolist(), 'remaining_demand':self.remaining_demand.tolist()}
         self.current_time+=self.time_unit_in_sec
-        #print('central')
-        #print(result['ev_power'])
-        if len(connected)>0:
-            t,a,_=self.get_TA([],whole=1)
-            print('central')
-            print(np.dot(t,ev_power))
-            #print(a)
+        
         return result
 
