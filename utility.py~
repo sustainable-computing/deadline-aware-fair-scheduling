@@ -67,7 +67,7 @@ def autolabel(rects, ax, xpos='center'):
     offset = {'center': 0, 'right': 1, 'left': -1}
 
     for rect in rects:
-        height = rect.get_height()
+        height = round(rect.get_height(), 2)
         ax.annotate('{}'.format(height),
                     xy=(rect.get_x() + rect.get_width() / 2, height),
                     xytext=(offset[xpos]*3, 3),  # use 3 points offset
@@ -75,7 +75,7 @@ def autolabel(rects, ax, xpos='center'):
                     ha=ha[xpos], va='bottom')
 
 
-def fig_compare(result_path, env):
+def fig_compare(result_path, last_slot, env):
     result = load_dict(result_path)
     #men_means, men_std = (20, 35, 30, 35, 27), (2, 3, 4, 1, 2)
     #women_means, women_std = (25, 32, 34, 20, 25), (3, 5, 2, 3, 3)
@@ -85,7 +85,8 @@ def fig_compare(result_path, env):
     soc_means = []
     soc_std = []
     
-
+    battery = np.array(env['battery'])
+    
     algo_name = []
     for key in result:
         if key == 'base_load':
@@ -94,9 +95,22 @@ def fig_compare(result_path, env):
         temp = []
         for subKey in result[key]:
             temp.append(jain_index(result[key][subKey]['ev_power']))
+
         temp = np.array(temp)
+
         jain_means.append(np.average(temp))
         jain_std.append(np.std(temp))
+        
+        remaining_demand = np.array(result[key][last_slot]['remaining_demand'])/3600.0
+        
+        temp = (battery - remaining_demand)/battery
+        count = 0
+        for i in range(len(temp)):
+            if temp[i] >= 0.951:
+                count+=1
+        
+        soc_means.append(count/env['evNumber'])
+        soc_std.append(0.0)
 
     ind = np.arange(len(jain_means))  # the x locations for the groups
     width = 0.35  # the width of the bars
@@ -104,19 +118,19 @@ def fig_compare(result_path, env):
     fig, ax = plt.subplots()
     rects1 = ax.bar(ind - width/2, jain_means, width, yerr=jain_std,
                     label='Jain Index')
-    #rects2 = ax.bar(ind + width/2, women_means, width, yerr=women_std,
-    #                label='Women')
+    rects2 = ax.bar(ind + width/2, soc_means, width, yerr=soc_std,
+                    label='SoC')
 
     # Add some text for labels, title and custom x-axis tick labels, etc.
     ax.set_ylabel('Values')
-    ax.set_title('Scores by group and gender')
+    ax.set_title('Performances')
     ax.set_xticks(ind)
     #ax.set_xticklabels(('G1', 'G2', 'G3', 'G4', 'G5'))
     ax.set_xticklabels(algo_name)
     ax.legend()
     
     autolabel(rects1, ax, "left")
-    #autolabel(rects2, ax, "right")
+    autolabel(rects2, ax, "right")
 
     fig.tight_layout()
 
@@ -206,5 +220,5 @@ if __name__ == '__main__':
     env = load_dict('env/static.txt')
     #fig_soc_vs_time('result/test.txt', (env['evDriverType']), algo='decentral')
     #fig_trans_load_vs_time('result/static.txt', trans=1, slot=60, env=env)
-    fig_compare('result/static.txt', env)
+    fig_compare('result/static.txt', 1438, env)
 
