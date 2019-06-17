@@ -95,7 +95,6 @@ def fig_compare(result_path, env):
         for subKey in result[key]:
             temp.append(jain_index(result[key][subKey]['ev_power']))
         temp = np.array(temp)
-
         jain_means.append(np.average(temp))
         jain_std.append(np.std(temp))
 
