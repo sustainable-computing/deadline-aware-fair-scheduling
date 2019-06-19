@@ -16,7 +16,7 @@ result = {}
 central_obj = central_algo(DSSObj, mat, env, start=1400, mode=mode, params={'theta':0.8})
 result['central'] = {}
 
-decentral_obj = decentral_algo(DSSObj, mat, env,start=1400, mode=mode, params={'theta':0.8, 'step_factor':25000.0, 'tol':0.1, 'max_iter':1000})
+decentral_obj = decentral_algo(DSSObj, mat, env,start=1400, mode=mode, params={'theta':0.8, 'step_factor':5e10, 'tol':0.1, 'max_iter':1000})
 result['decentral'] = {}
 
 llf_obj = base_algo(DSSObj, mat, env,start=1400, mode=mode, params={'value':'llf'})
