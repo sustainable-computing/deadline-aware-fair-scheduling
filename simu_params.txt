@@ -1,0 +1,28 @@
+{
+'env_path':'env/large.txt',
+
+'save_path':'result/large.txt',
+
+'base_load_path':'base_load/10_min/',
+
+'slot_len':10,
+
+'start_hr':0,
+
+'end_hr':2,
+
+'mode':'change',
+
+'algo':{
+
+'central':{'type':'central_algo', 'params':{'step_factor':25e5, 'max_iter':200,'conv':0.95, 'theta':0.8}},
+
+'decentral':{'type':'decentral_algo', 'params':{'x':False, 'theta':0.8, 'step_factor':25.0, 'tol':0.05, 'max_iter':100}},
+
+'llf':{'type':'base_line_algo', 'params':{'value':'llf'}},
+
+'edf':{'type':'base_line_algo', 'params':{'value':'edf'}},
+
+'base_load':{'type':'base_load_algo', 'params':{'value':'edf'}}
+}
+}
