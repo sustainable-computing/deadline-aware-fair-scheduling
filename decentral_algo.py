@@ -49,7 +49,7 @@ class decentral_algo(algo):
                 if self.params['x']==True:
                     lamda = np.maximum(0.0, lamda - gamma*(A-np.dot(T,x)))
                 else:
-                    g = self.env['transRating'] - self.get_trans_load(ev_power,P,Q)
+                    g = np.array(self.env['transRating']) - self.get_trans_load(ev_power,P,Q) 
                     g = np.array([g[e] for e in U])
 
                     lamda = np.maximum(0.0, lamda - gamma*g)
@@ -59,8 +59,25 @@ class decentral_algo(algo):
                 #    break
                 #print(ev_power)
                 #print(central['ev_power'])
-                if np.allclose(ev_power, central['ev_power'], atol=0.0, rtol=self.params['tol'])==True:
+                """
+                sub = [0,0]
+                temp = self.get_trans_load(ev_power,P,Q)
+            
+                sub[0] = central['trans_load'][0]+central['trans_load'][1]+central['trans_load'][2]
+                sub[1] = temp[0]+temp[1]+temp[2]
+
+                #print(abs(sub[1]-sub[0])/sub[0])
+                if abs(sub[1]-sub[0]) <= self.params['tol']*sub[0]:
                     break
+                """
+
+                c = sum(central['ev_power'])
+                d = sum(ev_power)
+
+                if abs(d-c) <= self.params['tol']*c:
+                    break 
+                #if np.allclose(ev_power, central['ev_power'], atol=0.0, rtol=self.params['tol'])==True:
+                #    break
 
         print(n_iter)
 

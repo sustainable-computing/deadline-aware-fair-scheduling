@@ -17,7 +17,7 @@
 
 'central':{'type':'central_algo', 'params':{'step_factor':25e5, 'max_iter':200,'conv':0.95, 'theta':0.8}},
 
-'decentral':{'type':'decentral_algo', 'params':{'x':False, 'theta':0.8, 'step_factor':25.0, 'tol':0.05, 'max_iter':100}},
+'decentral':{'type':'decentral_algo', 'params':{'x':False, 'theta':0.8, 'step_factor':75, 'tol':0.05, 'max_iter':100}},
 
 'llf':{'type':'base_line_algo', 'params':{'value':'llf'}},
 

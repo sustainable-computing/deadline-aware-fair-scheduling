@@ -219,6 +219,6 @@ def fig_soc_vs_time(result_path, usr_type, algo, slot=60):
 if __name__ == '__main__':
     env = load_dict('env/large.txt')
     #fig_soc_vs_time('result/test.txt', (env['evDriverType']), algo='decentral')
-    fig_trans_load_vs_time('result/large.txt', trans=10, slot=60, env=env)
+    fig_trans_load_vs_time('result/large.txt', trans=0, slot=60, env=env)
     #fig_compare('result/static.txt', 1438, env)
 
