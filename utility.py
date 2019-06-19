@@ -215,10 +215,32 @@ def fig_soc_vs_time(result_path, usr_type, algo, slot=60):
     plt.ylabel('kWh')
     plt.show()
 
+def fig_conv_ana(result_path):
+    result = load_dict(result_path)['decentral']
+    x = []
+    for key in result['gamma']:
+        x.append(key)
+
+    x = np.array(x)
+    x = np.sort(x)
+    
+    linewidth=1.0
+    y = []
+    
+    for key in x:
+        y.append(result['gamma'][key])
+        
+    #plt.legend([])
+    plt.plot(x, y)
+    plt.title('95% Convergence')
+    plt.xlabel('gamma')
+    plt.ylabel('iter')
+    plt.show()
 
 if __name__ == '__main__':
     env = load_dict('env/large.txt')
     #fig_soc_vs_time('result/test.txt', (env['evDriverType']), algo='decentral')
-    fig_trans_load_vs_time('result/large.txt', trans=0, slot=60, env=env)
+    #fig_trans_load_vs_time('result/large.txt', trans=0, slot=60, env=env)
     #fig_compare('result/static.txt', 1438, env)
+    fig_conv_ana('result/meta_large.txt')
 

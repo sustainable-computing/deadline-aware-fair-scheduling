@@ -1,0 +1,24 @@
+{
+'env_path':'env/large.txt',
+
+'save_path':'result/meta_large.txt',
+
+'base_load_path':'base_load/10_min/',
+
+'begin_index':20,
+
+'slot_len':10,
+
+'start_hr':0,
+
+'end_hr':24,
+
+'mode':'change',
+
+'algo':{
+
+'central':{'type':'central_algo', 'params':{'step_factor':25e5, 'max_iter':200,'conv':0.95, 'theta':0.8}},
+
+'decentral':{'type':'decentral_algo', 'params':{'x':True, 'theta':0.8, 'step_factor':75, 'tol':0.05, 'max_iter':1000}}
+}
+}
