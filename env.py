@@ -6,7 +6,7 @@ var = {}
 
 ################# Environments Variables ################
 # Number of EV owners in the network
-evNumber = 20  
+evNumber = 200  
 var['evNumber'] = evNumber
 
 # Number of low voltage nodes in the network

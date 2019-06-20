@@ -156,8 +156,8 @@ def fig_trans_load_vs_time(result_path, trans, slot=60, env=None):
     legend.append('rating')
     plt.plot(x,y,'--',linewidth=linewidth)
     for key in result:
-        if key=='llf' or key=='edf':
-            continue
+        #if key=='llf' or key=='edf':
+        #    continue
         y = []
         legend.append(key)
         for i in x:
@@ -238,9 +238,9 @@ def fig_conv_ana(result_path):
     plt.show()
 
 if __name__ == '__main__':
-    env = load_dict('env/large.txt')
+    env = load_dict('env/1000.txt')
     #fig_soc_vs_time('result/test.txt', (env['evDriverType']), algo='decentral')
-    #fig_trans_load_vs_time('result/large.txt', trans=0, slot=60, env=env)
+    fig_trans_load_vs_time('result/1000_x.txt', trans=1, slot=60, env=env)
     #fig_compare('result/static.txt', 1438, env)
-    fig_conv_ana('result/meta_large.txt')
+    #fig_conv_ana('result/meta_large.txt')
 
