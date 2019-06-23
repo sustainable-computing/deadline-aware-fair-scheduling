@@ -6,6 +6,7 @@ def runPF(dssObj, p, q, evNode, evP):
     for e in range(0, len(evP)):
         evExtraP[evNode[e]] = evP[e]
     p = [sum(x) for x in zip(p, evExtraP)]
+    #return (p,q)
     dssCircuit = dssObj.ActiveCircuit
     dssText = dssObj.Text
     nNodes = 33

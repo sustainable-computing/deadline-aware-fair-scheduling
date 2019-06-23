@@ -14,7 +14,7 @@ class algo:
         self.P_init = P
         self.Q_init = Q
         
-        self.trans_accu = 0.95
+        self.trans_accu = 1.0
         
         self.slot_len_in_min = slot_len_in_min
         
@@ -58,22 +58,23 @@ class algo:
         self.remaining_demand = np.maximum(0.0, self.remaining_demand - ev_power*self.slot_len_in_min)
         
     def get_trans_load(self, ev_power, P, Q): # In kVA
+        
         if self.mode=='change':
             within_hr = int(self.current_slot % (60 // self.slot_len_in_min))
             DSSCircuit = RunPF.runPF(self.DSSObj, P[:, within_hr], Q[:, within_hr], self.env['evNodeNumber'], ev_power)
         elif self.mode=='constant':
             DSSCircuit = RunPF.runPF(self.DSSObj, self.P_init[:, 0], self.Q_init[:, 0], self.env['evNodeNumber'], ev_power)
-
         
         # get the transformer power magnitudes
         trans_loads = GetTransPower.getTransPower(DSSCircuit)
         trans_loads = np.ravel(trans_loads)
-        trans_loads = [np.sqrt(trans_loads[i]**2+trans_loads[i+1]**2) for i in range(0,len(trans_loads),2)]
 
+        trans_loads = [np.sqrt(trans_loads[i]**2+trans_loads[i+1]**2) for i in range(0,len(trans_loads),2)]
         return(np.array(trans_loads))
         
     def get_available(self, trans_loads):
-        return self.trans_accu*np.maximum(0.0, self.env['transRating']-trans_loads)
+
+        return self.trans_accu*np.maximum(0.0, np.array(self.env['transRating']) - trans_loads)
     
     def get_UB(self, connected):
         temp = np.minimum(self.remaining_demand, self.max_rate)/self.slot_len_in_min

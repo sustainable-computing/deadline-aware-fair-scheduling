@@ -101,7 +101,7 @@ def fig_compare(result_path, last_slot, env):
         jain_means.append(np.average(temp))
         jain_std.append(np.std(temp))
         
-        remaining_demand = np.array(result[key][last_slot]['remaining_demand'])/3600.0
+        remaining_demand = np.array(result[key][last_slot]['remaining_demand'])/60.0
         
         temp = (battery - remaining_demand)/battery
         count = 0
@@ -156,8 +156,8 @@ def fig_trans_load_vs_time(result_path, trans, slot=60, env=None):
     legend.append('rating')
     plt.plot(x,y,'--',linewidth=linewidth)
     for key in result:
-        #if key=='llf' or key=='edf':
-        #    continue
+        if key=='llf' or key=='edf':
+            continue
         y = []
         legend.append(key)
         for i in x:
@@ -238,9 +238,9 @@ def fig_conv_ana(result_path):
     plt.show()
 
 if __name__ == '__main__':
-    env = load_dict('env/1000.txt')
-    #fig_soc_vs_time('result/test.txt', (env['evDriverType']), algo='decentral')
-    fig_trans_load_vs_time('result/1000_x.txt', trans=1, slot=60, env=env)
+    env = load_dict('env/static.txt')
+    #fig_soc_vs_time('result/1000.txt', (env['evDriverType']), algo='central')
+    fig_trans_load_vs_time('result/test.txt', trans=1, slot=60, env=env)
     #fig_compare('result/static.txt', 1438, env)
     #fig_conv_ana('result/meta_large.txt')
 

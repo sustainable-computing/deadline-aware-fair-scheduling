@@ -23,25 +23,26 @@ class decentral_algo(algo):
 
         if len(connected)>0:
             T, A, U = self.get_TAU(connected, P, Q)
-            
+            """
             m  = (np.amax(self.get_UB(connected)))**2
             L = np.amax(np.sum(T, axis=0))
             S = np.amax(np.sum(T, axis=1))
             
             gamma = (2.0*self.params['step_factor'])/(m*L*S+util.tol)
-            #gamma = 3.0483158055174284e-05
-            #gamma = 4.0e-05
+            gamma = 0.00060483158055174284
+            """
+            gamma = 0.0007
             print('gamma')
             print(gamma)
-            lamda = np.zeros(len(A))
-            #lamda = 0.1*np.ones(len(A))
+            #lamda = np.zeros(len(A))
+            lamda = np.ones(len(A))
             x = np.zeros(len(connected))
-            
             
             for i in range(0, self.params['max_iter']):
                 n_iter = i+1
+
                 x = np.minimum(np.maximum(LB, 1.0/(np.dot(T.T, lamda)+util.tol)), self.get_UB(connected))
-                #print(x)
+
                 ev_power = np.zeros(self.env['evNumber'])
                 for j in range(0, len(connected)):
                     ev_power[connected[j]] = x[j]
@@ -49,14 +50,15 @@ class decentral_algo(algo):
                 if self.params['x']==True:
                     lamda = np.maximum(0.0, lamda - gamma*(A-np.dot(T,x)))
                 else:
-                    g = np.array(self.env['transRating']) - self.get_trans_load(ev_power,P,Q) 
+                    g = np.array(self.env['transRating']) - self.get_trans_load(ev_power,P,Q)
                     g = np.array([g[e] for e in U])
+                  
 
                     lamda = np.maximum(0.0, lamda - gamma*g)
+                    #print(g)
 
-
-                #if np.allclose(self.get_trans_load(ev_power,P,Q), central['trans_load'], atol=0.0, rtol=self.params['tol'])==True:
-                #    break
+                if np.allclose(self.get_trans_load(ev_power,P,Q), central['trans_load'], atol=0.0, rtol=self.params['tol'])==True:
+                    break
                 #print(ev_power)
                 #print(central['ev_power'])
                 """
@@ -71,13 +73,17 @@ class decentral_algo(algo):
                     break
                 """
 
+                """
                 c = sum(central['ev_power'])
                 d = sum(ev_power)
 
                 if abs(d-c) <= self.params['tol']*c:
                     break 
+                """
                 #if np.allclose(ev_power, central['ev_power'], atol=0.0, rtol=self.params['tol'])==True:
                 #    break
+
+                
 
         print(n_iter)
 

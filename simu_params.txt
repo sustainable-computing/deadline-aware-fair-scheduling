@@ -1,7 +1,7 @@
 {
-'env_path':'env/1000.txt',
+'env_path':'env/static.txt',
 
-'save_path':'result/1000.txt',
+'save_path':'result/test.txt',
 
 'base_load_path':'base_load/10_min/',
 
@@ -11,13 +11,13 @@
 
 'end_hr':24,
 
-'mode':'change',
+'mode':'constant',
 
 'algo':{
 
 'central':{'type':'central_algo', 'params':{'theta':0.8}},
 
-'decentral':{'type':'decentral_algo', 'params':{'x':False, 'theta':0.8, 'step_factor':2, 'tol':0.05, 'max_iter':600}},
+'decentral':{'type':'decentral_algo', 'params':{'x':False, 'theta':0.8, 'step_factor':200, 'tol':0.05, 'max_iter':200}},
 
 'llf':{'type':'base_line_algo', 'params':{'value':'llf'}},
 
