@@ -10,7 +10,7 @@ class central_algo(algo):
         urgent = self.get_urgent(connected)
 
         if len(urgent) > 0:
-            print('yes')
+            print(yes)
             T, A, _ = self.get_TAU(urgent,P,Q)
             ur_LB = lb.solve(self.get_laxity(urgent), self.params['theta'], self.get_UB(urgent), A, T)
             for i in range(0, len(urgent)):

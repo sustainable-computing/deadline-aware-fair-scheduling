@@ -57,8 +57,8 @@ class decentral_algo(algo):
                     lamda = np.maximum(0.0, lamda - gamma*g)
                     #print(g)
 
-                #if np.allclose(self.get_trans_load(ev_power,P,Q), central['trans_load'], atol=0.0, rtol=self.params['tol'])==True:
-                #    break
+                if np.allclose(self.get_trans_load(ev_power,P,Q), central['trans_load'], atol=0.0, rtol=self.params['tol'])==True:
+                    break
                 #print(ev_power)
                 #print(central['ev_power'])
                 """
@@ -73,13 +73,13 @@ class decentral_algo(algo):
                     break
                 """
 
-                
+                """
                 c = sum(central['ev_power'])
                 d = sum(ev_power)
 
                 if abs(d-c) <= self.params['tol']*c:
                     break 
-                
+                """
                 #if np.allclose(ev_power, central['ev_power'], atol=0.0, rtol=self.params['tol'])==True:
                 #    break
 

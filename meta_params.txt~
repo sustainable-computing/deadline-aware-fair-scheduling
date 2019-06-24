@@ -1,5 +1,5 @@
 {
-'env_path':'env/static.txt',
+'env_path':'env/large.txt',
 
 'save_path':'result/meta_large.txt',
 

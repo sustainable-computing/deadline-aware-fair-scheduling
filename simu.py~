@@ -23,7 +23,7 @@ simu_params = {
 
 'slot_len':10,
 
-'start_hr':0,
+'start_hr':9,
 
 'end_hr':24,
 
@@ -33,7 +33,7 @@ simu_params = {
 
 'central':{'type':'central_algo', 'params':{'theta':0.8}},
 
-'decentral':{'type':'decentral_algo', 'params':{'x':True, 'theta':0.8, 'step_factor':20, 'tol':0.05, 'max_iter':200}},
+'decentral':{'type':'decentral_algo', 'params':{'x':False, 'theta':0.8, 'step_factor':20, 'tol':0.05, 'max_iter':200}},
 
 'llf':{'type':'base_line_algo', 'params':{'value':'llf'}},
 
