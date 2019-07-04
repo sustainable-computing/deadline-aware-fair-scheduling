@@ -14,8 +14,21 @@ def reciprocal(x):
 
 
 def f(x):
-    shift = 500
-    return np.array([0.0 if e <= -shift else e + shift + 1 for e in x])
+    #shift = 500
+    #return np.array([0.0 if e <= -shift else e + shift + 1 for e in x])
+    temp = []
+    for e in x:
+        if e==0:
+            temp.append(100.0)
+        elif e==1:
+            temp.append(10.0)
+        elif e==2:
+            temp.append(0.001)
+        else:
+            print('e')
+            print(e)
+
+    return np.array(temp)
 
 def jain_index(x):
     x = np.array(x)

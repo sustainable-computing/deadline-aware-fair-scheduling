@@ -14,7 +14,7 @@ class algo:
         self.P_init = P
         self.Q_init = Q
         
-        self.trans_accu = 0.9
+        self.trans_accu = 0.90
         
         self.slot_len_in_min = slot_len_in_min
         
@@ -26,7 +26,8 @@ class algo:
         self.remaining_demand = 60.0*np.array(env['demand']) # In kWmin
         #self.remaining_demand_d = 60.0*np.array(env['demand']) # In kWmin
 
-        self.max_rate = 1+60.0*np.array(env['demand']) # In kWmin
+        #self.max_rate = 1+60.0*np.array(env['demand']) # In kWmin
+        self.max_rate = 6.6*np.ones(env['evNumber']) # In kW
 
         self.arrival = np.round(np.array(self.env['evArrival'])/(60*slot_len_in_min))
         self.duration = np.round(np.array(self.env['evDuration'])/(60*slot_len_in_min))
@@ -44,7 +45,8 @@ class algo:
     def get_urgent(self, connected):
         urgent = []
         for e in connected:
-            if self.current_slot <= self.arrival[e]+self.claimed_duration[e] and self.arrival[e]+self.claimed_duration[e] <= self.current_slot+1:
+            
+            if self.current_slot < self.arrival[e]+self.claimed_duration[e]:
                 urgent.append(e)
         return np.array(urgent) 
         
@@ -53,6 +55,12 @@ class algo:
         for u in urgent:
             laxity.append((self.arrival[u]+self.claimed_duration[u]-self.current_slot) + scale*self.discrepancy[u] - self.remaining_demand[u]/self.max_rate[u])
         return np.array(laxity)
+        
+    def get_driver_type(self, connected):
+        driver_type = []
+        for c in connected:
+            driver_type.append(self.env['evDriverType'][c])
+        return np.array(driver_type)
         
     def update_remaining_demand(self, ev_power):
         self.remaining_demand = np.maximum(0.0, self.remaining_demand - ev_power*self.slot_len_in_min)
@@ -77,8 +85,8 @@ class algo:
         return self.trans_accu*np.maximum(0.0, np.array(self.env['transRating']) - trans_loads)
     
     def get_UB(self, connected):
-        temp = np.minimum(self.remaining_demand, self.max_rate)/self.slot_len_in_min
-        temp = np.maximum(util.tol, temp)
+        temp = np.minimum(self.remaining_demand/self.slot_len_in_min, self.max_rate)
+        #temp = np.maximum(util.tol, temp)
         return np.array([temp[e] for e in connected])
         
     def get_TAU(self, connected, P, Q, whole=0):

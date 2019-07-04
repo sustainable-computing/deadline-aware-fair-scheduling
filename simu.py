@@ -12,12 +12,12 @@ from decentral_algo import decentral_algo
 from base_line_algo import base_line_algo
 from base_load_algo import base_load_algo
 
-#simu_params = util.load_dict(sys.argv[1])
-
+simu_params = util.load_dict('simu_params.txt')
+"""
 simu_params = {
-'env_path':'env/static.txt',
+'env_path':'env/large.txt',
 
-'save_path':'result/test.txt',
+'save_path':'result/large.txt',
 
 'base_load_path':'base_load/10_min/',
 
@@ -42,15 +42,16 @@ simu_params = {
 'base_load':{'type':'base_load_algo', 'params':{}}
 }
 }
-
+"""
 env = util.load_dict(simu_params['env_path'])
 
 DSSObj = DSSStartup.dssstartup('master33Full.dss')
 
 # Initial P and Q
+bl_scale = 1.3
 PQ_dict = util.load_dict(simu_params['base_load_path']+'h'+str(simu_params['start_hr'])+'.txt')
-P = np.array(PQ_dict['P'])
-Q = np.array(PQ_dict['Q'])
+P = bl_scale*np.array(PQ_dict['P'])
+Q = bl_scale*np.array(PQ_dict['Q'])
 
 algo_list = {}
 for key in simu_params['algo']:
@@ -67,16 +68,19 @@ for key in simu_params['algo']:
 
 
 result = {}
+decentral_flag = False
 for key in algo_list:
     result[key] = {}
+    if key=='decentral':
+        decentral_flag= True
 #result['decentral'] = {}
 
 n_slots = int(60 / simu_params['slot_len'])
 
 for h in tqdm(range(simu_params['start_hr'], simu_params['end_hr'])):
     PQ_dict = util.load_dict(simu_params['base_load_path']+'h'+str(h)+'.txt')
-    P = np.array(PQ_dict['P'])
-    Q = np.array(PQ_dict['Q'])
+    P = bl_scale*np.array(PQ_dict['P'])
+    Q = bl_scale*np.array(PQ_dict['Q'])
 
     for t in range(0, n_slots):
         for key in algo_list:
@@ -86,10 +90,11 @@ for h in tqdm(range(simu_params['start_hr'], simu_params['end_hr'])):
             index = h*n_slots + t
             result[key][index] = algo_list[key].update(P,Q)
 
-            if key == 'central':
+            if key == 'central' and decentral_flag==True:
                result['decentral'][index] = algo_list['decentral'].update(P,Q, result['central'][index])
 
 """
+'decentral':{'type':'decentral_algo', 'params':{'x':True, 'theta':0.8, 'step_factor':200, 'tol':0.05, 'max_iter':200}},
 'decentral':{'type':'decentral_algo', 'params':{'theta':0.8, 'step_factor':25e4, 'tol':0.1, 'max_iter':1000}},
 central_obj = central_algo(DSSObj, mat, env, start=1400, mode=mode, params={'theta':0.8})
 result['central'] = {}

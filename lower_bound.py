@@ -19,7 +19,7 @@ w = np.array([])
 def w_update(laxity):
     laxity = np.asarray(laxity)
     global w
-    w = util.f(-laxity)
+    w = util.f(laxity)
 ################################################
 
 ############## Objective Function ##########################

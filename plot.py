@@ -93,7 +93,11 @@ def fig_compare(result_path, user_type, last_slot, env):
     soc_means = []
     soc_std = []
     
-   
+    if user_type==-1:
+        battery = np.array(env['battery'])
+    else:
+        battery = np.array([env['battery'][i] for i in range(0, env['evNumber']) if env['evDriverType'][i]==user_type])
+    #print(len(battery))
     
     algo_name = []
     for key in result:
@@ -102,36 +106,35 @@ def fig_compare(result_path, user_type, last_slot, env):
         algo_name.append(key)
         temp = []
         for subKey in result[key]:
-            ev_power = []
-            for i in range(0, env['evNumber']):
-                if env['evDriverType'][i] == user_type:
-                    ev_power.append(result[key][subKey]['ev_power'][i])
-            temp.append(util.jain_index(ev_power))
+            #if key=='central':
+                #print(result[key][subKey]['x'])
+            if user_type==-1:
+                value = result[key][subKey]['x']
+            else:
+                c = result[key][subKey]['connected']
+                l = len(c)
+                value = [result[key][subKey]['x'][i] for i in range(0,l) if env['evDriverType'][c[i]]==user_type]
+            temp.append(util.jain_index(value))
 
         temp = np.array(temp)
 
         jain_means.append(np.average(temp))
         jain_std.append(np.std(temp))
-        
-        remaining_demand = []
-        battery = []
 
-        for i in range(0, env['evNumber']):
-           if env['evDriverType'][i] == user_type:
-               remaining_demand.append(result[key][last_slot]['remaining_demand'][i])
-               battery.append(env['battery'][i])
+        if user_type==-1:
+            remaining_demand = np.array(result[key][last_slot]['remaining_demand'])/60.0
+        else:
+            remaining_demand = np.array([result[key][last_slot]['remaining_demand'][i] for i in range(0, env['evNumber']) if env['evDriverType'][i]==user_type])/60.0
 
-        remaining_demand = np.array(remaining_demand)/60.0
-        battery = np.array(battery)
-        print(key)
-        print(remaining_demand)
+        #print(key)
+        #print(remaining_demand)
 
         temp = (battery - remaining_demand)/battery
         count = 0
         #print(key)
         #print(temp)
         for i in range(len(temp)):
-            if temp[i] >= 0.95:
+            if temp[i] >= 0.9:
                 count+=1
         
         soc_means.append(count/len(temp))
@@ -144,11 +147,18 @@ def fig_compare(result_path, user_type, last_slot, env):
     rects1 = ax.bar(ind - width/2, jain_means, width, yerr=jain_std,
                     label='Jain Index', hatch='/')
     rects2 = ax.bar(ind + width/2, soc_means, width, yerr=soc_std,
-                    label='% of EV with\n >95% SoC')
+                    label='% of EV with\n >90% SoC')
 
     # Add some text for labels, title and custom x-axis tick labels, etc.
     ax.set_ylabel('Values')
-    ax.set_title('Performances')
+    if user_type==-1:
+        ax.set_title('Performances for all EVs')
+    elif user_type==0:
+        ax.set_title('Performances for Honest and Accurate EVs')
+    elif user_type==1:
+        ax.set_title('Performances for Honest but Inaccurate EVs')
+    else:
+        ax.set_title('Performances for Dishonest EVs')
     ax.set_xticks(ind)
     #ax.set_xticklabels(('G1', 'G2', 'G3', 'G4', 'G5'))
     ax.set_xticklabels(algo_name)
@@ -225,9 +235,12 @@ def fig_conv_ana(result_path):
     plt.show()
 
 if __name__ == '__main__':
-    env = util.load_dict('env/static.txt')
-    fig_soc_vs_time('result/test.txt', (env['evDriverType']), algo='llf')
-    #fig_trans_load_vs_time('result/test.txt', trans=2, env=env)
-    #fig_compare('result/test.txt', 1, 100, env)
+    simu_params = util.load_dict('simu_params.txt')
+    #env = util.load_dict('env/large.txt')
+    env = util.load_dict(simu_params['env_path'])
+    
+    #fig_soc_vs_time(simu_params['save_path'], (env['evDriverType']), algo='central')
+    #fig_trans_load_vs_time(simu_params['save_path'], trans=0, env=env)
+    fig_compare(simu_params['save_path'], 2, 143, env)
     #fig_conv_ana('result/meta_large.txt')
 

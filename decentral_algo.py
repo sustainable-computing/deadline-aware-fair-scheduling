@@ -31,15 +31,16 @@ class decentral_algo(algo):
             gamma = (2.0*self.params['step_factor'])/(m*L*S+util.tol)
             #gamma = 0.00060483158055174284
             
-            gamma = 0.0005
-            print('gamma')
-            print(gamma)
+            gamma = 0.0007
+            #print('gamma')
+            #print(gamma)
             #lamda = np.zeros(len(A))
             lamda = np.ones(len(A))
             x = np.zeros(len(connected))
             
             for i in range(0, self.params['max_iter']):
                 n_iter = i+1
+
 
                 x = np.minimum(np.maximum(LB, 1.0/(np.dot(T.T, lamda)+util.tol)), self.get_UB(connected))
 
@@ -85,7 +86,7 @@ class decentral_algo(algo):
 
                 
 
-        print(n_iter)
+        #print(n_iter)
 
         ev_power = np.zeros(self.env['evNumber'])
         for i in range(0, len(connected)):
@@ -93,6 +94,7 @@ class decentral_algo(algo):
             
             
         self.update_remaining_demand(ev_power)
+
         result = {'trans_load':self.get_trans_load(ev_power, P, Q).tolist(), 'ev_power':ev_power.tolist(), 'remaining_demand':self.remaining_demand.tolist(),'gamma':gamma, 'n_iter':n_iter}
         self.current_slot += 1
         

@@ -6,7 +6,7 @@ var = {}
 
 ################# Environments Variables ################
 # Number of EV owners in the network
-evNumber = 120
+evNumber = 1500
 var['evNumber'] = evNumber
 
 # Number of low voltage nodes in the network
@@ -14,24 +14,26 @@ secondaryNodes = 1760
 var['secondaryNodes'] = secondaryNodes
 
 # EV connection points
-"""
+
 evNodeNumber = np.array(range(0, secondaryNodes))
 np.random.shuffle(evNodeNumber)
 evNodeNumber = evNodeNumber[0:evNumber]
-"""
-evNodeNumber = np.array(range(0, evNumber))
+
+#evNodeNumber = np.array(range(0, evNumber))
 var['evNodeNumber'] = evNodeNumber.tolist()
 
 # Type of the driver
 # Type 0: honest and accurate std=10 minutes
 # Type 1: honest but not accurate std=45 minutes
 # Type 2: dishonest std=60 minutes
-#evDriverType = np.random.randint(0, 3, evNumber)
+evDriverType = np.random.randint(0, 3, evNumber)
+"""
 evDriverType = []
 for i in range(0, 3):
     for j in range(0, evNumber//3):
         evDriverType.append(i)
 evDriverType = np.array(evDriverType)
+"""
 var['evDriverType'] = evDriverType.tolist()
 
 # Std for type: 0, 1, 2
@@ -71,16 +73,16 @@ for e in range(0,evNumber):
 batterySize = [16, 30, 42, 75]
 
 # Type of each EV's battery
-#evBatteryType = np.random.randint(0, len(batterySize), evNumber)
-evBatteryType = 3*np.ones((evNumber,), dtype=int)
+evBatteryType = np.random.randint(0, len(batterySize), evNumber)
+#evBatteryType = 3*np.ones((evNumber,), dtype=int)
 
 battery = [batterySize[i] for i in evBatteryType]
 var['battery'] = battery
 
 
 # Initial charge of each EV at the time connection in percentage
-#evInitCharge = np.random.randint(0, 96, evNumber)
-evInitCharge = 20*np.ones(evNumber)
+evInitCharge = np.random.randint(0, 20, evNumber)
+#evInitCharge = 20*np.ones(evNumber)
 # Demand of each EV in kWh
 demand = np.array([(1.0-evInitCharge[e]/100.0)*batterySize[evBatteryType[e]] for e in range(0, evNumber)])
 var['demand'] = demand.tolist()
@@ -109,7 +111,7 @@ for e in range(0, evNumber):
         evClaimedDuration[e] = evDuration[e]-abs(np.random.normal(0, evDriverStd[evDriverType[e]]))
     if evClaimedDuration[e] < 1:
         evClaimedDuration[e] = 1
-
+"""
 evArrival = []
 evClaimedDuration = []
 evDuration = []
@@ -122,6 +124,7 @@ for i in range(0,3):
 evArrival = np.array(evArrival)
 evClaimedDuration = np.array(evClaimedDuration)
 evDuration = np.array(evDuration)
+"""
 
 var['evArrival'] = np.round(evArrival*3600).tolist()
 var['evClaimedDuration'] = np.round(evClaimedDuration*3600).tolist()
