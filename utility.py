@@ -2,7 +2,7 @@ import numpy as np
 import sys
 
 
-tol = 1e-08
+tol = 1e-02
 inf = 1e8
 
 def log(x):
@@ -14,8 +14,8 @@ def reciprocal(x):
 
 
 def f(x):
-    #shift = 500
-    #return np.array([0.0 if e <= -shift else e + shift + 1 for e in x])
+    shift = 500
+    return np.array([1.0 if e <= -shift else e + shift + 1 for e in x])
     temp = []
     for e in x:
         if e==0:

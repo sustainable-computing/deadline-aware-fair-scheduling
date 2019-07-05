@@ -13,7 +13,8 @@ class central_algo(algo):
         if len(urgent) > 0:
             #print('yes')
             T, A, _ = self.get_TAU(urgent,P,Q)
-            ur_LB = lb.solve(self.get_driver_type(urgent), self.params['theta'], self.get_UB(urgent)+util.tol, A, T)
+            #ur_LB = lb.solve(self.get_driver_type(urgent), self.params['theta'], self.get_UB(urgent)+util.tol, A, T)
+            ur_LB = lb.solve(self.get_laxity(urgent), self.params['theta'], self.get_UB(urgent), A, T)
             for i in range(0, len(urgent)):
                 j, = np.where(connected == urgent[i])
                 LB[j[0]] = ur_LB[i]
@@ -22,7 +23,7 @@ class central_algo(algo):
         if len(connected) > 0:
             T, A, U = self.get_TAU(connected,P,Q)
             
-            x = primal.solve(LB, self.get_UB(connected)+util.tol, A, T)
+            x = primal.solve(LB, self.get_UB(connected), A, T)
             #x = primal.solve(np.zeros(len(connected)), 10*np.ones(len(connected)), A, T)
             #x = primal.solve(np.zeros(len(connected)), self.get_UB(connected)-LB+util.tol, A, T)
 

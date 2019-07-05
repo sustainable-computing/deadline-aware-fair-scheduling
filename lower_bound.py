@@ -46,10 +46,19 @@ def obj_hess(x):
 def solve(laxity,theta,UB,A,T):
     
     # Giving weights according to laxity and urgency
-    w_update(laxity)
+    w_update(-laxity)
 
     # Lower bounds
     LB = np.zeros(len(UB))
+    
+    ################ Making Sure that UB >= LB #############
+    for i in range(len(UB)):
+        if LB[i] >= UB[i]:
+            print('Warning (lower_bound.py): LB >= UB')
+            print('LB: {}'.format(LB[i]))
+            print('UB: {}'.format(UB[i]))
+            UB[i] = LB[i]+0.0001
+    ########################################################
 
     ##################### Optimization Variables ###########
     # LB <= x <= UB
@@ -69,7 +78,7 @@ def solve(laxity,theta,UB,A,T):
     res = minimize(obj, x0, method='trust-constr', 
                    jac=obj_der, hess=obj_hess, 
                    constraints=[linear_constraint], 
-                   options={'verbose':0, 'maxiter': 101}, bounds=bounds)
+                   options={'verbose':0, 'maxiter': 10001}, bounds=bounds)
     ########################################################
 
     return [0.0 if e<=util.tol else e for e in res.x]
