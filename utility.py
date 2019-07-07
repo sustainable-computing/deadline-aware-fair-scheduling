@@ -2,11 +2,13 @@ import numpy as np
 import sys
 
 
-tol = 1e-02
+tol = 1e-3
 inf = 1e8
 
 def log(x):
-    return np.array([-inf if e <= 0.0 else np.log(e) for e in x])
+    #return np.log(x)
+    #return np.array([0.0 if e <= 0.0 else np.log(e)+inf for e in x])
+    return np.array([-12 if e <= 1e-12 else np.log(e) for e in x])
 
 
 def reciprocal(x):
@@ -14,8 +16,9 @@ def reciprocal(x):
 
 
 def f(x):
-    shift = 500
-    return np.array([1.0 if e <= -shift else e + shift + 1 for e in x])
+    #shift = 500
+    #return np.array([1.0 if e <= -shift else e + shift + 1 for e in x])
+    #return np.ones(len(x))
     temp = []
     for e in x:
         if e==0:
@@ -23,7 +26,7 @@ def f(x):
         elif e==1:
             temp.append(10.0)
         elif e==2:
-            temp.append(0.001)
+            temp.append(1.0)
         else:
             print('e')
             print(e)
@@ -47,5 +50,5 @@ def load_dict(file_name):
     f = open(file_name, 'r')
     data = f.read()
     f.close()
-    return eval(data)
+    return eval(data.replace('array(', '').replace('])', ']'))
 

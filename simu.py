@@ -48,7 +48,7 @@ env = util.load_dict(simu_params['env_path'])
 DSSObj = DSSStartup.dssstartup('master33Full.dss')
 
 # Initial P and Q
-bl_scale = 1.3
+bl_scale = 1.3/pow(0.5, 0.5)
 PQ_dict = util.load_dict(simu_params['base_load_path']+'h'+str(simu_params['start_hr'])+'.txt')
 P = bl_scale*np.array(PQ_dict['P'])
 Q = bl_scale*np.array(PQ_dict['Q'])

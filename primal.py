@@ -31,37 +31,49 @@ def obj_hess(x):
 
 ######################## Solving ###########################
 def solve(LB,UB,A,T):
+    ################ Making Numpy Array ###################
+    LB = np.array(LB)
+    UB = np.array(UB)
+    A = np.array(A)
+    T = np.array(T)
+    ###################################################### 
+    
     ################ Making Sure that UB >= LB #############
+    '''
     for i in range(len(UB)):
         if LB[i] >= UB[i]:
             print('Warning (primal.py): LB >= UB')
             print('LB: {}'.format(LB[i]))
             print('UB: {}'.format(UB[i]))
-            UB[i] = LB[i]+0.0001
+            UB[i] = LB[i]+util.tol
+    '''
     ########################################################
-
+    
     ##################### Optimization Variables ###########
     # LB <= x <= UB
-    bounds = Bounds(LB, UB)
+    # To avoid small values we multiply each bound by a factor
+    bounds = Bounds(LB/util.tol, UB/util.tol)
     ########################################################
 
     ##################### Constraints ######################
     # 0.0 <= Tx <= A
-    linear_constraint = LinearConstraint(T, 0.0, A)
+    linear_constraint = LinearConstraint(T, 0.0, A/util.tol)
     ########################################################
 
     ##################### Initial Guess ####################
-    x0 = LB
+    x0 = UB/util.tol
+    #x0 = np.zeros(len(LB))
     ########################################################
-    
+    method = 'trust-constr'
+    #method = 'SLSQP'
     ##################### Solution #########################
-    res = minimize(obj, x0, method='trust-constr', 
+    res = minimize(obj, x0, method=method, 
                    jac=obj_der, hess=obj_hess, 
                    constraints=[linear_constraint], 
-                   options={'verbose':0, 'maxiter': 10001}, bounds=bounds)
+                   options={'gtol':util.tol, 'verbose':0, 'maxiter':1000}, bounds=bounds)
     ########################################################
-
-    return [0.0 if e<=util.tol else e for e in res.x]
+    return res.x*util.tol
+    return [0.0 if e<=util.tol else e*util.tol for e in res.x]
 ############################################################  
 
 if __name__=="__main__":
@@ -71,8 +83,8 @@ if __name__=="__main__":
     # subject to:  1.0 <= x1 <= 10.0
     #              3.0 <= x2 <= 8.0
     #              x1 + x2 <= 10.0 
-    LB = [1.0,3.0]
-    UB = [10.0,8.0]
+    LB = [0.0,3.0]
+    UB = [0.0001,3.0]
     A = [10.0]
     T = [[1,1]]
 

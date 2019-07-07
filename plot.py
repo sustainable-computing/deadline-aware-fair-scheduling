@@ -16,6 +16,12 @@ def format_func(value, tick_number):
         
 def fig_trans_load_vs_time(result_path, trans, env=None):
     result = util.load_dict(result_path)
+    
+    temp = []
+    for i in result['base_load']:
+        temp.append(np.amin(np.array(env['transRating'])/np.array(result['base_load'][i]['trans_load'])))
+    print(np.amax(np.array(temp)))
+    
     x = []
     for key in result:
         for subKey in result[key]:
@@ -240,7 +246,7 @@ if __name__ == '__main__':
     env = util.load_dict(simu_params['env_path'])
     
     #fig_soc_vs_time(simu_params['save_path'], (env['evDriverType']), algo='central')
-    #fig_trans_load_vs_time(simu_params['save_path'], trans=0, env=env)
-    fig_compare(simu_params['save_path'], 2, 143, env)
+    fig_trans_load_vs_time(simu_params['save_path'], trans=2, env=env)
+    #fig_compare(simu_params['save_path'], 2, 143, env)
     #fig_conv_ana('result/meta_large.txt')
 
