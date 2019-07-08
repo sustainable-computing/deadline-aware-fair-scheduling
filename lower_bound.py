@@ -57,7 +57,7 @@ def solve(driver_type, claimed_duration, if_over_time, UB, A, T):
     ################ Changing UB Based on Over-Time ##########
     for i in range(len(UB)):
         if if_over_time[i]==True:
-            UB[i] *= 0.01
+            UB[i] *= 0.4
     
     ################ Making Numpy Array ###################
     LB = np.array(LB)/util.tol
