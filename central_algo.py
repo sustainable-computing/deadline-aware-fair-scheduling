@@ -36,7 +36,7 @@ class central_algo(algo):
             #x = primal.solve(LB, self.get_UB(connected), A, T)
             #print(A)
             #print(self.get_UB(connected))
-            x = lb.solve(self.get_driver_type(connected), 1.0, self.get_UB(connected), A, T)
+            x = lb.solve(self.get_driver_type(connected), self.get_claimed(connected), self.get_over_time(connected), self.get_UB(connected), A, T)
             #x = primal.solve(np.zeros(len(connected)), 10*np.ones(len(connected)), A, T)
             #x = primal.solve(np.zeros(len(connected)), self.get_UB(connected)-LB+util.tol, A, T)
 

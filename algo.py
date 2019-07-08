@@ -41,6 +41,21 @@ class algo:
             if self.current_slot >= self.arrival[i] and self.current_slot <= self.arrival[i] + self.duration[i] and self.remaining_demand[i] >= util.tol:
                 connected.append(i)
         return np.array(connected)
+        
+    def get_over_time(self, connected):
+        over_time = []
+        for c in connected:
+            if self.current_slot > self.claimed_duration[c]:
+                over_time.append(True)
+            else:
+                over_time.append(False)
+        return over_time
+        
+    def get_claimed(self, connected):
+        claimed = []
+        for c in connected:
+            claimed.append(self.claimed_duration[c])
+        return claimed
     
     def get_urgent(self, connected):
         urgent = []

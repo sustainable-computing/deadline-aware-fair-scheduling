@@ -1,7 +1,7 @@
 {
 'env_path':'env/1000.txt',
 
-'save_path':'result/1000_SLSQP.txt',
+'save_path':'result/1000_SLSQP_new.txt',
 
 'base_load_path':'base_load/10_min/',
 

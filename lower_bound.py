@@ -16,10 +16,10 @@ from scipy.optimize import LinearConstraint
 
 ############### Updating Weights ###############
 w = np.array([])
-def w_update(laxity):
-    laxity = np.asarray(laxity)
+def w_update(driver_type, claimed_duration):
+    laxity = np.asarray(driver_type)
     global w
-    w = util.f(laxity)
+    w = util.f(driver_type)*(144 - np.array(claimed_duration))
 ################################################
 
 ############## Objective Function ##########################
@@ -46,13 +46,18 @@ def obj_hess(x):
 ############################################################
 
 ######################## Solving ###########################
-def solve(laxity,theta,UB,A,T):
+def solve(driver_type, claimed_duration, if_over_time, UB, A, T):
     
     # Giving weights according to laxity and urgency
-    w_update(laxity)
+    w_update(driver_type, claimed_duration)
 
     # Lower bounds
     LB = np.zeros(len(UB))
+    
+    ################ Changing UB Based on Over-Time ##########
+    for i in range(len(UB)):
+        if if_over_time[i]==True:
+            UB[i] *= 0.01
     
     ################ Making Numpy Array ###################
     LB = np.array(LB)/util.tol
@@ -120,7 +125,7 @@ def solve(laxity,theta,UB,A,T):
     '''
     #print(A/util.tol-np.dot(T,res.x))
     return res.x*util.tol
-    return [0.0 if e<=util.tol else e for e in res.x]
+    #return [0.0 if e<=util.tol else e for e in res.x]
 ############################################################  
 
 if __name__=="__main__":
