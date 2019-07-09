@@ -246,7 +246,7 @@ if __name__ == '__main__':
     env = util.load_dict(simu_params['env_path'])
     
     #fig_soc_vs_time(simu_params['save_path'], (env['evDriverType']), algo='central')
-    fig_trans_load_vs_time(simu_params['save_path'], trans=2, env=env)
-    #fig_compare(simu_params['save_path'], 2, 143, env)
+    fig_trans_load_vs_time(simu_params['save_path'], trans=5, env=env)
+    #fig_compare(simu_params['save_path'], 0, 143, env)
     #fig_conv_ana('result/meta_large.txt')
 

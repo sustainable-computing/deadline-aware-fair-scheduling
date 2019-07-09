@@ -38,14 +38,14 @@ class algo:
     def get_connected(self):
         connected = []
         for i in range(0, self.env['evNumber']):
-            if self.current_slot >= self.arrival[i] and self.current_slot <= self.arrival[i] + self.duration[i] and self.remaining_demand[i] >= util.tol:
+            if self.current_slot >= self.arrival[i] and self.current_slot <= self.arrival[i] + self.duration[i] and self.remaining_demand[i]/self.slot_len_in_min >= util.tol:
                 connected.append(i)
         return np.array(connected)
         
     def get_over_time(self, connected):
         over_time = []
         for c in connected:
-            if self.current_slot > self.claimed_duration[c]:
+            if self.current_slot > self.arrival[c] + self.claimed_duration[c]:
                 over_time.append(True)
             else:
                 over_time.append(False)
