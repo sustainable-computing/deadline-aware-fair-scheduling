@@ -9,6 +9,7 @@ class central_algo(algo):
         #LB = np.zeros(len(connected))
         #urgent = self.get_urgent(connected)
         x = []
+        w = []
         '''
         if len(urgent) > 0:
             #print('yes')
@@ -37,7 +38,13 @@ class central_algo(algo):
             #print(A)
             #print(self.get_UB(connected))
             #x = lb.solve(self.get_driver_type(connected), self.get_claimed(connected), self.get_over_time(connected), self.get_UB(connected), A, T)
-            x = lb.solve(driver_type=self.get_driver_type(connected), UB=self.get_UB(connected), A=A, T=T)
+            w = util.f(self.get_driver_type(connected))
+            
+            #laxity = self.get_laxity(connected)
+            #w = w * (144-laxity)
+
+            x = lb.solve(w=w, UB=self.get_UB(connected), A=A, T=T)
+            #print(x)
             #x = primal.solve(np.zeros(len(connected)), 10*np.ones(len(connected)), A, T)
             #x = primal.solve(np.zeros(len(connected)), self.get_UB(connected)-LB+util.tol, A, T)
 
@@ -55,7 +62,7 @@ class central_algo(algo):
 
         self.update_remaining_demand(ev_power)
 
-        result = {'trans_load':self.get_trans_load(ev_power, P, Q).tolist(), 'ev_power':ev_power.tolist(), 'x':x, 'connected':connected.tolist(), 'remaining_demand':self.remaining_demand.tolist()}
+        result = {'trans_load':self.get_trans_load(ev_power, P, Q).tolist(), 'ev_power':ev_power.tolist(), 'x':x, 'connected':connected.tolist(), 'remaining_demand':self.remaining_demand.tolist(), 'w':w}
 
         self.current_slot += 1
 

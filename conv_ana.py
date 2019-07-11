@@ -99,7 +99,7 @@ T, A, U = get_TAU()
 
 scale = 1e-4
 
-for gamma in tqdm(range(5, 10)):
+for gamma in tqdm(range(5, 100)):
     gammas.append(gamma)
     n_iter = 0
 

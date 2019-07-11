@@ -38,7 +38,7 @@ class algo:
     def get_connected(self):
         connected = []
         for i in range(0, self.env['evNumber']):
-            if self.current_slot >= self.arrival[i] and self.current_slot <= self.arrival[i] + self.duration[i] and self.remaining_demand[i]/self.slot_len_in_min >= util.tol:
+            if self.current_slot >= self.arrival[i] and self.current_slot <= self.arrival[i] + self.duration[i] and self.remaining_demand[i] >= util.tol:
                 connected.append(i)
         return np.array(connected)
         
@@ -68,7 +68,9 @@ class algo:
     def get_laxity(self, urgent, scale=1.0):
         laxity = []
         for u in urgent:
-            laxity.append((self.arrival[u]+self.claimed_duration[u]-self.current_slot) + scale*self.discrepancy[u] - self.remaining_demand[u]/self.max_rate[u])
+            l = (self.arrival[u]+self.claimed_duration[u]-self.current_slot) + scale*self.discrepancy[u] 
+            l -= (self.remaining_demand[u]/self.max_rate[u])/self.slot_len_in_min
+            laxity.append(l)
         return np.array(laxity)
         
     def get_driver_type(self, connected):
