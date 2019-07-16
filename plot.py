@@ -8,8 +8,8 @@ def format_func(value, tick_number):
     t = int(value//6)
     if t==2 or t==4 or t==6 or t==8 or t==10:
         return str(t) + ":00 am"
-    if t==12:
-        return str(t) + ":00 pm"
+    if t==0:
+        return str(t+12) + ":00 am"
     if t > 12 and (t-12)%2 == 0:
         return str(t-12) + ":00 pm"
     return "" 
@@ -47,8 +47,8 @@ def fig_trans_load_vs_time(result_path, trans, env=None):
     legend.append('rating')
     plt.plot(x,y,'--',linewidth=linewidth)
     for key in result:
-        #if key=='llf' or key=='edf':
-        #    continue
+        if key=='llf' or key=='edf':
+            continue
         y = []
         legend.append(key)
         for i in x:
@@ -246,7 +246,7 @@ if __name__ == '__main__':
     env = util.load_dict(simu_params['env_path'])
     
     #fig_soc_vs_time(simu_params['save_path'], (env['evDriverType']), algo='central')
-    #fig_trans_load_vs_time(simu_params['save_path'], trans=1, env=env)
-    fig_compare(simu_params['save_path'], 2, 143, env)
+    fig_trans_load_vs_time(simu_params['save_path'], trans=0, env=env)
+    #fig_compare(simu_params['save_path'], 0, 143, env)
     #fig_conv_ana('result/meta_large.txt')
 

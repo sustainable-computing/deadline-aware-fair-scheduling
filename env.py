@@ -6,7 +6,7 @@ var = {}
 
 ################# Environments Variables ################
 # Number of EV owners in the network
-evNumber = 1000
+evNumber = 800
 var['evNumber'] = evNumber
 
 # Number of low voltage nodes in the network
@@ -24,13 +24,15 @@ var['evNodeNumber'] = evNodeNumber.tolist()
 
 # Type of the driver
 # Type 0: conservative: claimed duration = actutal duration + std(1 hour)
-# Type 1: honest risk-taker: claimed duration = actual duration - std(20 min) 
-# Type 2: dishonest risk-taker: claimed duration = actual duration - std(45 min)
-evDriverType = np.random.randint(0, 3, evNumber)
+# Type 1: honest risk-taker: claimed duration = actual duration - std(1 hour) 
+#X Type 2: dishonest risk-taker: claimed duration = actual duration - std(45 min)
+#evDriverType = np.random.randint(0, 3, evNumber)
+evDriverType = np.random.randint(0, 2, evNumber)
 var['evDriverType'] = evDriverType.tolist()
 
 # Std for type: 0, 1, 2
-evDriverStd = [1.0, 0.20, 0.45]
+#evDriverStd = [1.0, 0.20, 0.45]
+evDriverStd = [1.0, 1.0]
 
 
 # GMMs for arrival times
@@ -74,7 +76,7 @@ var['battery'] = battery
 
 
 # Initial charge of each EV at the time connection in percentage
-evInitCharge = np.random.randint(0, 20, evNumber)
+evInitCharge = np.random.randint(0, 3, evNumber)
 #evInitCharge = 20*np.ones(evNumber)
 # Demand of each EV in kWh
 demand = np.array([(1.0-evInitCharge[e]/100.0)*batterySize[evBatteryType[e]] for e in range(0, evNumber)])

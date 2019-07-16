@@ -79,8 +79,8 @@ class algo:
             driver_type.append(self.env['evDriverType'][c])
         return np.array(driver_type)
         
-    def update_remaining_demand(self, ev_power):
-        self.remaining_demand = np.maximum(0.0, self.remaining_demand - ev_power*self.slot_len_in_min)
+    def update_remaining_demand(self, ev_power, duration):
+        self.remaining_demand = np.maximum(0.0, self.remaining_demand - ev_power*duration)
         
     def get_trans_load(self, ev_power, P, Q): # In kVA
         

@@ -60,7 +60,7 @@ class central_algo(algo):
         #x = (np.array(x) - LB).tolist()
        
 
-        self.update_remaining_demand(ev_power)
+        self.update_remaining_demand(ev_power, self.slot_len_in_min)
 
         result = {'trans_load':self.get_trans_load(ev_power, P, Q).tolist(), 'ev_power':ev_power.tolist(), 'x':x, 'connected':connected.tolist(), 'remaining_demand':self.remaining_demand.tolist(), 'w':w}
 

@@ -12,7 +12,7 @@ if not os.path.exists(dirName):
 else:    
     print("Directory " , dirName ,  " already exists")
 
-resolution = 10 # min
+resolution = 2 # min
 
 dirName+='/'+str(resolution)+'_min'
 if not os.path.exists(dirName):

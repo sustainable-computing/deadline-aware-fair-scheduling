@@ -28,9 +28,9 @@ class base_line_algo(algo):
             #print(j)
             #print(k)
             if B[j]>=UB[index] and B[k]>=UB[index]:
-                power[index]=1.0*UB[index]
+                power[index]=0.95*UB[index]
             else:
-                power[index]=1.0*np.minimum(B[j],B[k])
+                power[index]=0.95*np.minimum(B[j],B[k])
             #print('bj')
             #print(B[j])
             #print('bk')
@@ -96,7 +96,7 @@ class base_line_algo(algo):
         #print(A)
         #print('E')
         #print(np.dot(T,ev_power))
-        self.update_remaining_demand(ev_power)
+        self.update_remaining_demand(ev_power, self.slot_len_in_min)
 
         result = {'trans_load':self.get_trans_load(ev_power, P, Q).tolist(), 'ev_power':ev_power.tolist(), 'x':x, 'connected':connected.tolist(), 'remaining_demand':self.remaining_demand.tolist()}
 

@@ -22,9 +22,9 @@ def f(x):
     temp = []
     for e in x:
         if e==0:
-            temp.append(100.0)
+            temp.append(4.0)
         elif e==1:
-            temp.append(10.0)
+            temp.append(1.0)
         elif e==2:
             temp.append(1.0)
         else:
@@ -34,7 +34,7 @@ def f(x):
     return np.array(temp)
 
 def g(x):
-    #return 1.0 / (1.0 + np.exp(-x))
+    #return 1.0 / (1.0 + np.exp(x))
     temp = []
     for e in x:
         if e<=0.0:
