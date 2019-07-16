@@ -7,8 +7,9 @@ def solve(w, UB, A, T):
 
     z = cp.Variable(len(UB))
 
-    print(A)
-    obj = cp.Maximize(sum(np.diag(w) * cp.log(z + 1000)))
+    #print(A)
+    #print(w)
+    obj = cp.Maximize(sum(np.diag(w) * cp.log(z + util.tol)))
     #print(T)
     #print(A)
     constraints = [0 <= z, z <= UB, T * z <= A]

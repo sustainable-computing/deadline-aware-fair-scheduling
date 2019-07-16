@@ -9,7 +9,7 @@ class decentral_algo(algo):
 
         connected = self.get_connected()
 
-        w = util.f(self.get_driver_type(connected))
+        w = util.f(self.get_driver_type(connected)) * util.g(self.get_laxity(connected, scale=0.0))
         #laxity = self.get_laxity(connected)
         #w = w * (144-laxity)
 
@@ -93,7 +93,7 @@ class decentral_algo(algo):
 
                 
 
-        print(n_iter)
+        #print(n_iter)
         #print(x)
         ev_power = np.zeros(self.env['evNumber'])
         for i in range(0, len(connected)):

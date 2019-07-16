@@ -7,9 +7,9 @@ import DSSStartup
 from tqdm import tqdm
 from matplotlib import pyplot as plt
 
-result_path = 'result/1000_mosek_2.txt'
+result_path = 'result/1000_mosek_4.txt'
 base_load_path = 'base_load/10_min/'
-env_path = 'env/1000.txt'
+env_path = 'env/1000_1.txt'
 
 DSSObj = DSSStartup.dssstartup('master33Full.dss')
 
@@ -37,7 +37,8 @@ def get_driver_type():
         driver_type.append(env['evDriverType'][c])
     return np.array(driver_type)
     
-w = util.f(get_driver_type())
+#w = util.f(get_driver_type())
+w = result['central'][slot]['w']
 
 def get_trans_load(ev_power): # In kVA
     DSSCircuit = RunPF.runPF(DSSObj, P[:, h%n_slot_per_hr], Q[:, h%n_slot_per_hr], env['evNodeNumber'], ev_power)
@@ -91,66 +92,69 @@ def get_TAU(whole=0):
         #A = np.maximum(util.tol, A)
         return (np.array(T), A, np.array(U))
 
-gammas = []
-iters = []
 
 T, A, U = get_TAU()
-
-
 scale = 1e-4
+legend = []
 
-for gamma in tqdm(range(5, 100)):
-    gammas.append(gamma)
-    n_iter = 0
+for tol in [0.05, 0.01]:
+    gammas = []
+    iters = []
+    for gamma in tqdm(range(5, 100)):
+        gammas.append(gamma)
+        n_iter = 0
 
-    lamda = np.ones(len(A))
-    x = np.zeros(len(connected))
-    LB = np.zeros(len(connected))
+        lamda = np.ones(len(A))
+        x = np.zeros(len(connected))
+        LB = np.zeros(len(connected))
 
-    for i in range(0, 200):
-        n_iter = i+1
-        
-        x = np.minimum(np.maximum(LB, w/np.dot(T.T, lamda)), get_UB())
+        for i in range(0, 200):
+            n_iter = i+1
+            
+            x = np.minimum(np.maximum(LB, w/np.dot(T.T, lamda)), get_UB())
 
-        ev_power = np.zeros(env['evNumber'])
-        for j in range(0, len(connected)):
-            ev_power[connected[j]] = x[j]
+            ev_power = np.zeros(env['evNumber'])
+            for j in range(0, len(connected)):
+                ev_power[connected[j]] = x[j]
 
-        g = np.array(env['transRating']) - get_trans_load(ev_power) 
-        g = np.array([g[e] for e in U])
+            g = np.array(env['transRating']) - get_trans_load(ev_power) 
+            g = np.array([g[e] for e in U])
 
-        lamda = np.maximum(0.0, lamda - gamma*scale*g)
+            lamda = np.maximum(0.0, lamda - gamma*scale*g)
 
 
-        #if np.allclose(self.get_trans_load(ev_power,P,Q), central['trans_load'], atol=0.0, rtol=self.params['tol'])==True:
-        #    break
-        #print(ev_power)
-        #print(central['ev_power'])
-        
-        sub = [0,0]
-        temp = get_trans_load(ev_power)
+            #if np.allclose(self.get_trans_load(ev_power,P,Q), central['trans_load'], atol=0.0, rtol=self.params['tol'])==True:
+            #    break
+            #print(ev_power)
+            #print(central['ev_power'])
+            '''
+            sub = [0,0]
+            temp = get_trans_load(ev_power)
 
-        sub[0] = result['central'][slot]['trans_load'][0]+result['central'][slot]['trans_load'][1]+result['central'][slot]['trans_load'][2]
-        sub[1] = temp[0]+temp[1]+temp[2]
+            sub[0] = result['central'][slot]['trans_load'][0]+result['central'][slot]['trans_load'][1]+result['central'][slot]['trans_load'][2]
+            sub[1] = temp[0]+temp[1]+temp[2]
+            
+            #print(abs(sub[1]-sub[0])/sub[0])
+            if abs(sub[1]-sub[0]) <= tol*sub[0]:
+                break
+            '''
+            
+            c = sum(result['central'][slot]['ev_power'])
+            d = sum(ev_power)
 
-        #print(abs(sub[1]-sub[0])/sub[0])
-        if abs(sub[1]-sub[0]) <= tol*sub[0]:
-            break
-        
-        '''
-        c = sum(result['central'][slot]['ev_power'])
-        d = sum(ev_power)
+            if abs(d-c) <= tol*c:
+                break 
+            
+            #if np.allclose(ev_power, central['ev_power'], atol=0.0, rtol=self.params['tol'])==True:
+            #    break
+        print(n_iter)
+        iters.append(n_iter)
 
-        if abs(d-c) <= tol*c:
-            break 
-        '''
-        #if np.allclose(ev_power, central['ev_power'], atol=0.0, rtol=self.params['tol'])==True:
-        #    break
-    print(n_iter)
-    iters.append(n_iter)
+    legend.append(str(100-tol*100)+'%')
+    plt.plot(gammas, iters)
 
-plt.plot(gammas, iters)
-plt.title('95% Convergence of Decentral Algo')
+plt.legend(legend)
+plt.title('Convergence Analysis of Decentral Algo')
 plt.xlabel('step-size ($x10^{-4}$)')
 plt.ylabel('# of iterations')
 

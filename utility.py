@@ -2,7 +2,7 @@ import numpy as np
 import sys
 
 
-tol = 1e-3
+tol = 1e-4
 inf = 1e8
 
 def log(x):
@@ -31,6 +31,18 @@ def f(x):
             print('e')
             print(e)
 
+    return np.array(temp)
+
+def g(x):
+    #return 1.0 / (1.0 + np.exp(-x))
+    temp = []
+    for e in x:
+        if e<=0.0:
+            temp.append(3.0)
+        elif e<=10.0:
+            temp.append(2.0)
+        else:
+            temp.append(1.0)
     return np.array(temp)
 
 def jain_index(x):

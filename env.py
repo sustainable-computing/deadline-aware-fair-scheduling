@@ -23,21 +23,14 @@ evNodeNumber = evNodeNumber[0:evNumber]
 var['evNodeNumber'] = evNodeNumber.tolist()
 
 # Type of the driver
-# Type 0: honest and accurate std=10 minutes
-# Type 1: honest but not accurate std=45 minutes
-# Type 2: dishonest std=60 minutes
+# Type 0: conservative: claimed duration = actutal duration + std(1 hour)
+# Type 1: honest risk-taker: claimed duration = actual duration - std(20 min) 
+# Type 2: dishonest risk-taker: claimed duration = actual duration - std(45 min)
 evDriverType = np.random.randint(0, 3, evNumber)
-"""
-evDriverType = []
-for i in range(0, 3):
-    for j in range(0, evNumber//3):
-        evDriverType.append(i)
-evDriverType = np.array(evDriverType)
-"""
 var['evDriverType'] = evDriverType.tolist()
 
 # Std for type: 0, 1, 2
-evDriverStd = [0.1, 0.75, 1.0]
+evDriverStd = [1.0, 0.20, 0.45]
 
 
 # GMMs for arrival times
@@ -103,11 +96,11 @@ for e in range(0, evNumber):
     elif evDuration[e] > 14:
         evDuration[e] = 14
     # Claimed duration in hour
-    if evDriverType[e] < 2:
-        # Honest driver
-        evClaimedDuration[e] = evDuration[e]+np.random.normal(0, evDriverStd[evDriverType[e]])
+    if evDriverType[e] < 1:
+        # Conservative driver
+        evClaimedDuration[e] = evDuration[e]+abs(np.random.normal(0, evDriverStd[evDriverType[e]]))
     else:
-        # Dishonest driver
+        # Risk-Taker driver
         evClaimedDuration[e] = evDuration[e]-abs(np.random.normal(0, evDriverStd[evDriverType[e]]))
     if evClaimedDuration[e] < 1:
         evClaimedDuration[e] = 1

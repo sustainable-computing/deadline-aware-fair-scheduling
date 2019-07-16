@@ -38,7 +38,7 @@ class algo:
     def get_connected(self):
         connected = []
         for i in range(0, self.env['evNumber']):
-            if self.current_slot >= self.arrival[i] and self.current_slot <= self.arrival[i] + self.duration[i] and self.remaining_demand[i] >= util.tol:
+            if self.current_slot >= self.arrival[i] and self.current_slot <= self.arrival[i] + self.duration[i] and self.remaining_demand[i] > 0.0:
                 connected.append(i)
         return np.array(connected)
         

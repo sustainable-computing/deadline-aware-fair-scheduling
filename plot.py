@@ -160,11 +160,11 @@ def fig_compare(result_path, user_type, last_slot, env):
     if user_type==-1:
         ax.set_title('Performances for all EVs')
     elif user_type==0:
-        ax.set_title('Performances for Honest and Accurate EVs')
+        ax.set_title('Performances for Conservative EVs')
     elif user_type==1:
-        ax.set_title('Performances for Honest but Inaccurate EVs')
+        ax.set_title('Performances for Honest Risk-Taker EVs')
     else:
-        ax.set_title('Performances for Dishonest EVs')
+        ax.set_title('Performances for Dishonest Risk-Taker EVs')
     ax.set_xticks(ind)
     #ax.set_xticklabels(('G1', 'G2', 'G3', 'G4', 'G5'))
     ax.set_xticklabels(algo_name)
@@ -246,7 +246,7 @@ if __name__ == '__main__':
     env = util.load_dict(simu_params['env_path'])
     
     #fig_soc_vs_time(simu_params['save_path'], (env['evDriverType']), algo='central')
-    #fig_trans_load_vs_time(simu_params['save_path'], trans=0, env=env)
+    #fig_trans_load_vs_time(simu_params['save_path'], trans=1, env=env)
     fig_compare(simu_params['save_path'], 2, 143, env)
     #fig_conv_ana('result/meta_large.txt')
 
