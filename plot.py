@@ -16,12 +16,12 @@ def format_func(value, tick_number):
         
 def fig_trans_load_vs_time(result_path, trans, env=None):
     result = util.load_dict(result_path)
-    
+    '''
     temp = []
     for i in result['base_load']:
         temp.append(np.amin(np.array(env['transRating'])/np.array(result['base_load'][i]['trans_load'])))
     print(np.amax(np.array(temp)))
-    
+    '''
     x = []
     for key in result:
         for subKey in result[key]:
@@ -39,13 +39,14 @@ def fig_trans_load_vs_time(result_path, trans, env=None):
 
     ax.xaxis.set_minor_locator(MultipleLocator(1))
 
-    
+    #fig.add_subplot(221)
     linewidth=1.0
     legend = []
     y = 3*env['transRating'][3*trans]*np.ones(len(x))
     
     legend.append('rating')
     plt.plot(x,y,'--',linewidth=linewidth)
+
     for key in result:
         if key=='llf' or key=='edf':
             continue
@@ -67,6 +68,70 @@ def fig_trans_load_vs_time(result_path, trans, env=None):
     plt.ylabel('kVA')
  
     plt.xticks(rotation=30)
+    plt.show()
+    
+def fig_trans_load_subplot(result_path, trans_list, env):
+    result = util.load_dict(result_path)
+
+    x = []
+    for key in result:
+        for subKey in result[key]:
+            x.append(subKey)
+
+        break
+    
+    x = np.array(x)
+    x = np.sort(x)
+    
+    fig, ax = plt.subplots(sharex=True, sharey=True)
+    ax.tick_params(labelcolor='w', top='off', bottom='off', left='off', right='off')
+    ax.set_xlabel('Time')
+    ax.set_ylabel('kVA')
+
+    #fig.add_subplot(221)
+    linewidth=1.0
+    
+    ii = 1
+    for trans in trans_list:
+        ax = fig.add_subplot(len(trans_list), 1, ii)
+        
+        if trans==0:
+            ax.xaxis.set_major_locator(MultipleLocator(6))
+            ax.xaxis.set_major_formatter(FuncFormatter(format_func))
+
+            ax.xaxis.set_minor_locator(MultipleLocator(1))
+        else:
+            ax.get_xaxis().set_visible(False)
+
+        y = 3*env['transRating'][3*trans]*np.ones(len(x))
+        
+        legend = []
+        legend.append('rating')
+        plt.plot(x,y,'--',linewidth=linewidth)
+
+        for key in result:
+            if key=='llf' or key=='edf':
+                continue
+            y = []
+            legend.append(key)
+            for i in x:
+                y.append(result[key][i]['trans_load'][(3 * trans + 0)] + result[key][i]['trans_load'][(3 * trans + 1)] + result[key][i]['trans_load'][(3 * trans + 2)])
+
+            y = np.array(y)
+            if key=='base_load':
+                plt.plot(x, y,linewidth=linewidth, alpha=0.3)
+            else:
+                plt.plot(x, y,linewidth=linewidth)
+
+        plt.legend(legend)
+
+        plt.title('Transformer (#'+ str(trans)+')'+' Loading')
+        
+     
+        plt.xticks(rotation=30)
+        #plt.yticks([])
+        
+        ii += 1
     plt.show()
 
 def autolabel(rects, ax, xpos='center'):
@@ -246,7 +311,8 @@ if __name__ == '__main__':
     env = util.load_dict(simu_params['env_path'])
     
     #fig_soc_vs_time(simu_params['save_path'], (env['evDriverType']), algo='central')
-    fig_trans_load_vs_time(simu_params['save_path'], trans=0, env=env)
+    #fig_trans_load_vs_time(simu_params['save_path'], trans=0, env=env)
+    fig_trans_load_subplot(simu_params['save_path'], trans_list=[1, 0], env=env)
     #fig_compare(simu_params['save_path'], 0, 143, env)
     #fig_conv_ana('result/meta_large.txt')
 
