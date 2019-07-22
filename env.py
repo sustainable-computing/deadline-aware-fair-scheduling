@@ -6,7 +6,7 @@ var = {}
 
 ################# Environments Variables ################
 # Number of EV owners in the network
-evNumber = 800
+evNumber = 500
 var['evNumber'] = evNumber
 
 # Number of low voltage nodes in the network
@@ -27,7 +27,10 @@ var['evNodeNumber'] = evNodeNumber.tolist()
 # Type 1: honest risk-taker: claimed duration = actual duration - std(1 hour) 
 #X Type 2: dishonest risk-taker: claimed duration = actual duration - std(45 min)
 #evDriverType = np.random.randint(0, 3, evNumber)
-evDriverType = np.random.randint(0, 2, evNumber)
+
+#evDriverType = np.random.randint(0, 2, evNumber)
+#evDriverType = np.zeros(evNumber, dtype=int)
+evDriverType = np.ones(evNumber, dtype=int)
 var['evDriverType'] = evDriverType.tolist()
 
 # Std for type: 0, 1, 2
@@ -37,7 +40,7 @@ evDriverStd = [1.0, 1.0]
 
 # GMMs for arrival times
 probArrival = [.016, .244, .037, .064, .135, .454, .05]
-meanArrival = [0, 2.5, 7.4, 8.5, 12.28, 18.4, 22.21]
+meanArrival = [0.0, 2.5, 7.4, 8.5, 12.28, 18.4, 22.21]
 stdArrival = [.09, 2.38, .9, 1.6, 1.4, 2.38, .35]
 
 # Defining the Gaussian model for each EV
@@ -65,7 +68,7 @@ for e in range(0,evNumber):
 # 30kWh: Nissan Leaf
 # 42kWh: BMW i3
 # 75kWh: Tesla 3
-batterySize = [16, 30, 42, 75]
+batterySize = np.array([16, 30, 42, 75])*60.0 # in kWmin
 
 # Type of each EV's battery
 evBatteryType = np.random.randint(0, len(batterySize), evNumber)
@@ -121,15 +124,16 @@ evClaimedDuration = np.array(evClaimedDuration)
 evDuration = np.array(evDuration)
 """
 
-var['evArrival'] = np.round(evArrival*3600).tolist()
-var['evClaimedDuration'] = np.round(evClaimedDuration*3600).tolist()
-var['evDuration'] = np.round(evDuration*3600).tolist()
+# in min
+var['evArrival'] = np.round(evArrival*60).tolist()
+var['evClaimedDuration'] = np.round(evClaimedDuration*60).tolist()
+var['evDuration'] = np.round(evDuration*60).tolist()
 
 # Discrepancy for different types of EV  
-discp_type = [0, 2700, 3600] # In second
-var['discrepancy'] = [discp_type[evDriverType[i]] for i in range(0, evNumber)] 
-
-
+#discp_type = [0, 2700, 3600] # In minutes
+#var['discrepancy'] = [discp_type[evDriverType[i]] for i in range(0, evNumber)] 
+discrepancy = evDuration - evClaimedDuration
+var['discrepancy'] = discrepancy.tolist()
 # Transformer rating for each phase in kVA
 transRating=[2500,2500,2500,100,100,100,100,100,100,100,100,100,75,75,75,75,75,75,166.67,166.67,166.67,166.67,166.67,
 166.67,50,50,50,75,75,75,75,75,75,75,75,75,75,75,75,100,100,100,75,75,75,75,75,75,50,50,50,100,100,100,100,100,100,75,

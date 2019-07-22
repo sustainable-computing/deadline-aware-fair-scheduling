@@ -1,7 +1,7 @@
 {
-'env_path':'env/500.txt',
+'env_path':'env/500_mix.txt',
 
-'save_path':'result/500_mosek.txt',
+'save_path':'result/500_mix_w.txt',
 
 'base_load_path':'base_load/10_min/',
 

@@ -124,8 +124,11 @@ def fig_trans_load_subplot(result_path, trans_list, env):
                 plt.plot(x, y,linewidth=linewidth)
 
         plt.legend(legend)
-
-        plt.title('Transformer (#'+ str(trans)+')'+' Loading')
+        
+        if trans==0:
+            plt.title('Substation Loading')
+        else:
+            plt.title('Transformer (#'+ str(trans)+')'+' Loading')
         
      
         plt.xticks(rotation=30)
@@ -205,7 +208,7 @@ def fig_compare(result_path, user_type, last_slot, env):
         #print(key)
         #print(temp)
         for i in range(len(temp)):
-            if temp[i] >= 0.9:
+            if temp[i] >= 1.0:
                 count+=1
         
         soc_means.append(count/len(temp))
@@ -218,7 +221,7 @@ def fig_compare(result_path, user_type, last_slot, env):
     rects1 = ax.bar(ind - width/2, jain_means, width, yerr=jain_std,
                     label='Jain Index', hatch='/')
     rects2 = ax.bar(ind + width/2, soc_means, width, yerr=soc_std,
-                    label='% of EV with\n >90% SoC')
+                    label='% of EV with\n 100% SoC')
 
     # Add some text for labels, title and custom x-axis tick labels, etc.
     ax.set_ylabel('Values')
@@ -312,7 +315,7 @@ if __name__ == '__main__':
     
     #fig_soc_vs_time(simu_params['save_path'], (env['evDriverType']), algo='central')
     #fig_trans_load_vs_time(simu_params['save_path'], trans=0, env=env)
-    fig_trans_load_subplot(simu_params['save_path'], trans_list=[1, 0], env=env)
-    #fig_compare(simu_params['save_path'], 0, 143, env)
+    fig_trans_load_subplot(simu_params['save_path'], trans_list=[2, 1, 0], env=env)
+    #fig_compare(simu_params['save_path'], 1, 143, env)
     #fig_conv_ana('result/meta_large.txt')
 

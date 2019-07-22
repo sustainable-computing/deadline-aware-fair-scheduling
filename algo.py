@@ -23,17 +23,17 @@ class algo:
         self.current_slot = start_hr*self.n_slot_per_hr
         #self.time_factor = 3600.0/self.slot_len_in_min
         
-        self.remaining_demand = 60.0*np.array(env['demand']) # In kWmin
+        self.remaining_demand = np.array(env['demand']) # In kWmin
         #self.remaining_demand_d = 60.0*np.array(env['demand']) # In kWmin
 
         #self.max_rate = 1+60.0*np.array(env['demand']) # In kWmin
         self.max_rate = 6.6*np.ones(env['evNumber']) # In kW
 
-        self.arrival = np.round(np.array(self.env['evArrival'])/(60*slot_len_in_min))
-        self.duration = np.round(np.array(self.env['evDuration'])/(60*slot_len_in_min))
-        self.claimed_duration = np.round(np.array(self.env['evClaimedDuration'])/(60*slot_len_in_min))
+        self.arrival = np.round(np.array(self.env['evArrival'])/slot_len_in_min)
+        self.duration = np.round(np.array(self.env['evDuration'])/slot_len_in_min)
+        self.claimed_duration = np.round(np.array(self.env['evClaimedDuration'])/slot_len_in_min)
         
-        self.discrepancy = np.array(self.env['discrepancy'])/(60*slot_len_in_min)
+        self.discrepancy = np.array(self.env['discrepancy'])/slot_len_in_min
         
     def get_connected(self):
         connected = []
@@ -72,6 +72,12 @@ class algo:
             l -= (self.remaining_demand[u]/self.max_rate[u])/self.slot_len_in_min
             laxity.append(l)
         return np.array(laxity)
+        
+    def get_discrepancy(self, connected):
+        discrepancy = []
+        for c in connected:
+            discrepancy.append(self.env['discrepancy'][c])
+        return np.array(discrepancy)
         
     def get_driver_type(self, connected):
         driver_type = []

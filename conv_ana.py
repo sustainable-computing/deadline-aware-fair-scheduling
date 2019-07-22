@@ -7,9 +7,9 @@ import DSSStartup
 from tqdm import tqdm
 from matplotlib import pyplot as plt
 
-result_path = 'result/1000_mosek_4.txt'
+result_path = 'result/500_mix_w.txt'
 base_load_path = 'base_load/10_min/'
-env_path = 'env/1000_1.txt'
+env_path = 'env/500_mix.txt'
 
 DSSObj = DSSStartup.dssstartup('master33Full.dss')
 

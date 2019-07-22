@@ -15,6 +15,12 @@ def reciprocal(x):
     return np.array([inf if e <= 0.0 else 1.0 / e for e in x])
 
 
+def w(x, y):
+    x = np.array(x)
+    y = np.array(y)
+    z = -x-y
+    return np.exp(z/100.0)
+
 def f(x):
     #shift = 500
     #return np.array([1.0 if e <= -shift else e + shift + 1 for e in x])

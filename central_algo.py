@@ -38,8 +38,8 @@ class central_algo(algo):
             #print(A)
             #print(self.get_UB(connected))
             #x = lb.solve(self.get_driver_type(connected), self.get_claimed(connected), self.get_over_time(connected), self.get_UB(connected), A, T)
-            w = util.f(self.get_driver_type(connected)) * util.g(self.get_laxity(connected, scale=0.0))
-            
+            #w = util.f(self.get_driver_type(connected)) * util.g(self.get_laxity(connected, scale=0.0))
+            w = util.w(self.get_discrepancy(connected), self.get_laxity(connected, scale=0.0))
             #laxity = self.get_laxity(connected)
             #w = w * (144-laxity)
 

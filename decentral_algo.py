@@ -9,7 +9,8 @@ class decentral_algo(algo):
 
         connected = self.get_connected()
 
-        w = util.f(self.get_driver_type(connected)) * util.g(self.get_laxity(connected, scale=0.0))
+        #w = util.f(self.get_driver_type(connected)) * util.g(self.get_laxity(connected, scale=0.0))
+        w = util.w(self.get_discrepancy(connected), self.get_laxity(connected, scale=0.0))
         #laxity = self.get_laxity(connected)
         #w = w * (144-laxity)
 
