@@ -51,8 +51,10 @@ def g(x):
             temp.append(1.0)
     return np.array(temp)
 
-def jain_index(x):
+def jain_index(x, w=None):
     x = np.array(x)
+    if w != None:
+        x = x * np.array(w)
     sqr_sum = np.sum(x**2)
     if sqr_sum <= tol:
         return 1.0

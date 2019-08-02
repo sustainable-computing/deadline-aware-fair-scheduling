@@ -110,8 +110,8 @@ def fig_trans_load_subplot(result_path, trans_list, env):
         plt.plot(x,y,'--',linewidth=linewidth)
 
         for key in result:
-            if key=='llf' or key=='edf':
-                continue
+            #if key=='llf' or key=='edf':
+            #    continue
             y = []
             legend.append(key)
             for i in x:
@@ -122,8 +122,8 @@ def fig_trans_load_subplot(result_path, trans_list, env):
                 plt.plot(x, y,linewidth=linewidth, alpha=0.3)
             else:
                 plt.plot(x, y,linewidth=linewidth)
-
-        plt.legend(legend)
+        if ii == 1:
+            plt.legend(legend)
         
         if trans==0:
             plt.title('Substation Loading')
@@ -135,7 +135,8 @@ def fig_trans_load_subplot(result_path, trans_list, env):
         #plt.yticks([])
         
         ii += 1
-    plt.show()
+    #plt.show()
+    plt.savefig('trans1.png')
 
 def autolabel(rects, ax, xpos='center'):
     """
@@ -188,6 +189,12 @@ def fig_compare(result_path, user_type, last_slot, env):
                 c = result[key][subKey]['connected']
                 l = len(c)
                 value = [result[key][subKey]['x'][i] for i in range(0,l) if env['evDriverType'][c[i]]==user_type]
+                '''
+                if 'w' in result[key][subKey]:
+                    w = [result[key][subKey]['w'][i] for i in range(0,l) if env['evDriverType'][c[i]]==user_type]
+                else:
+                    w = np.ones(len(value)).tolist()
+                '''
             temp.append(util.jain_index(value))
 
         temp = np.array(temp)
@@ -196,9 +203,9 @@ def fig_compare(result_path, user_type, last_slot, env):
         jain_std.append(np.std(temp))
 
         if user_type==-1:
-            remaining_demand = np.array(result[key][last_slot]['remaining_demand'])/60.0
+            remaining_demand = np.array(result[key][last_slot]['remaining_demand'])
         else:
-            remaining_demand = np.array([result[key][last_slot]['remaining_demand'][i] for i in range(0, env['evNumber']) if env['evDriverType'][i]==user_type])/60.0
+            remaining_demand = np.array([result[key][last_slot]['remaining_demand'][i] for i in range(0, env['evNumber']) if env['evDriverType'][i]==user_type])
 
         #print(key)
         #print(remaining_demand)
@@ -208,7 +215,7 @@ def fig_compare(result_path, user_type, last_slot, env):
         #print(key)
         #print(temp)
         for i in range(len(temp)):
-            if temp[i] >= 1.0:
+            if temp[i] >= 0.9:
                 count+=1
         
         soc_means.append(count/len(temp))
@@ -221,7 +228,7 @@ def fig_compare(result_path, user_type, last_slot, env):
     rects1 = ax.bar(ind - width/2, jain_means, width, yerr=jain_std,
                     label='Jain Index', hatch='/')
     rects2 = ax.bar(ind + width/2, soc_means, width, yerr=soc_std,
-                    label='% of EV with\n 100% SoC')
+                    label='% of EV with\n $\geq$90% SoC')
 
     # Add some text for labels, title and custom x-axis tick labels, etc.
     ax.set_ylabel('Values')
@@ -230,9 +237,9 @@ def fig_compare(result_path, user_type, last_slot, env):
     elif user_type==0:
         ax.set_title('Performances for Conservative EVs')
     elif user_type==1:
-        ax.set_title('Performances for Honest Risk-Taker EVs')
+        ax.set_title('Performances for Risk-Taking EVs')
     else:
-        ax.set_title('Performances for Dishonest Risk-Taker EVs')
+        ax.set_title('Performances for DishonestRisk-Taker EVs')
     ax.set_xticks(ind)
     #ax.set_xticklabels(('G1', 'G2', 'G3', 'G4', 'G5'))
     ax.set_xticklabels(algo_name)
@@ -243,7 +250,8 @@ def fig_compare(result_path, user_type, last_slot, env):
 
     fig.tight_layout()
 
-    plt.show()
+    #plt.show()
+    plt.savefig('compare_0_all_conv')
 
 
 def fig_soc_vs_time(result_path, usr_type, algo, slot=60):
@@ -315,7 +323,7 @@ if __name__ == '__main__':
     
     #fig_soc_vs_time(simu_params['save_path'], (env['evDriverType']), algo='central')
     #fig_trans_load_vs_time(simu_params['save_path'], trans=0, env=env)
-    fig_trans_load_subplot(simu_params['save_path'], trans_list=[2, 1, 0], env=env)
-    #fig_compare(simu_params['save_path'], 1, 143, env)
+    #fig_trans_load_subplot(simu_params['save_path'], trans_list=[0], env=env)
+    fig_compare(simu_params['save_path'], 0, 143, env)
     #fig_conv_ana('result/meta_large.txt')
 

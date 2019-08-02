@@ -27,7 +27,7 @@ class algo:
         #self.remaining_demand_d = 60.0*np.array(env['demand']) # In kWmin
 
         #self.max_rate = 1+60.0*np.array(env['demand']) # In kWmin
-        self.max_rate = 6.6*np.ones(env['evNumber']) # In kW
+        self.max_rate = 8.0*np.ones(env['evNumber']) # In kW
 
         self.arrival = np.round(np.array(self.env['evArrival'])/slot_len_in_min)
         self.duration = np.round(np.array(self.env['evDuration'])/slot_len_in_min)
