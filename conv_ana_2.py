@@ -7,7 +7,7 @@ import DSSStartup
 from tqdm import tqdm
 from matplotlib import pyplot as plt
 
-result_path = 'result/500_mix_w.txt'
+result_path = 'result/500_mix_f.txt'
 base_load_path = 'base_load/10_min/'
 env_path = 'env/500_mix.txt'
 
@@ -18,7 +18,7 @@ tol = 0.05
 result = util.load_dict(result_path)
 env = util.load_dict(env_path)
 
-slot = 140
+slot = 109
 connected = result['central'][slot]['connected']
 
 
@@ -52,7 +52,7 @@ def get_trans_load(ev_power): # In kVA
     return(np.array(trans_loads))
     
 def get_UB():
-    return 6.6*np.ones(len(connected))
+    return 8.0*np.ones(len(connected))
     
 def get_available(trans_loads):
     return 0.9*np.maximum(0.0, np.array(env['transRating']) - trans_loads)
@@ -96,7 +96,7 @@ def get_TAU(whole=0):
 T, A, U = get_TAU()
 scale = 1e-4
 legend = []
-
+m = 10
 for tol in [0.05, 0.01]:
     gammas = []
     iters = []
@@ -107,20 +107,49 @@ for tol in [0.05, 0.01]:
         lamda = np.ones(len(A))
         x = np.zeros(len(connected))
         LB = np.zeros(len(connected))
+        
+        if tol == 0.05:
+            ##################################################################
+            history = []
+            lamda_k = np.copy( lamda )
 
-        for i in range(0, 200):
-            n_iter = i+1
-            
-            x = np.minimum(np.maximum(LB, w/np.dot(T.T, lamda)), get_UB())
+            x = np.minimum(np.maximum(LB, w/np.dot(T.T, lamda**2)), get_UB())
 
             ev_power = np.zeros(env['evNumber'])
             for j in range(0, len(connected)):
                 ev_power[connected[j]] = x[j]
 
-            g = np.array(env['transRating']) - get_trans_load(ev_power) 
-            g = np.array([g[e] for e in U])
+            g_k = ( np.array(env['transRating']) - get_trans_load(ev_power) )
+            g_k = 2 * lamda_k * np.array([g_k[e] for e in U])
+            ###################################################################
 
-            lamda = np.maximum(0.0, lamda - gamma*scale*g)
+        for i in range(0, 200):
+            n_iter = i+1
+            
+            if tol == 0.05:
+                lamda = lamda - util.lbfgs_get_direction(history, g_k)
+                x = np.minimum(np.maximum(LB, w/np.dot(T.T, lamda**2)), get_UB())
+            else:
+                x = np.minimum(np.maximum(LB, w/np.dot(T.T, lamda)), get_UB())
+        
+
+            ev_power = np.zeros(env['evNumber'])
+            for j in range(0, len(connected)):
+                ev_power[connected[j]] = x[j]
+
+            g = ( np.array(env['transRating']) - get_trans_load(ev_power) )
+            if tol == 0.05:
+                g = 2 * lamda * np.array([g[e] for e in U])
+
+                s_k = lamda - lamda_k
+                y_k = g - g_k
+            
+                history = util.lbfgs_update_history(history, m, s_k, y_k)
+                lamda_k = lamda
+                g_k = g
+            else:
+                g = np.array([g[e] for e in U])
+                lamda = np.maximum(0.0, lamda - gamma*scale*g)
 
 
             #if np.allclose(self.get_trans_load(ev_power,P,Q), central['trans_load'], atol=0.0, rtol=self.params['tol'])==True:
@@ -130,6 +159,7 @@ for tol in [0.05, 0.01]:
             '''
             sub = [0,0]
             temp = get_trans_load(ev_power)
+
             sub[0] = result['central'][slot]['trans_load'][0]+result['central'][slot]['trans_load'][1]+result['central'][slot]['trans_load'][2]
             sub[1] = temp[0]+temp[1]+temp[2]
             
@@ -149,12 +179,17 @@ for tol in [0.05, 0.01]:
         print(n_iter)
         iters.append(n_iter)
 
-    legend.append(str(100-tol*100)+'%')
+    #legend.append(str(100-tol*100)+'%')
+    if tol == 0.05:
+        legend.append('l-bfgs')
+    else:
+        legend.append('gpa')
+    
     plt.plot(gammas, iters)
 
 plt.legend(legend)
-plt.title('Convergence Analysis of Decentral Algo')
-plt.xlabel('step-size ($x10^{-4}$)')
+plt.title('99% Convergence Analysis of Decentral Algo')
+plt.xlabel('step-size ($x10^{-5}$)')
 plt.ylabel('# of iterations')
 
 plt.show()
