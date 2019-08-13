@@ -96,6 +96,7 @@ def lbfgs_update_history(history, max_len, s_k, y_k):
     y_k_copy = np.copy( y_k )
     history.append( (s_k_copy, y_k_copy) )
     return history
+    
 
 def jain_index(x, w=None):
     x = np.array(x)
