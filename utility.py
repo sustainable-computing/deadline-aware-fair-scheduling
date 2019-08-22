@@ -2,7 +2,7 @@ import numpy as np
 import sys
 
 
-tol = 1e-4
+tol = 1e-8
 inf = 1e8
 
 def log(x):
@@ -10,6 +10,13 @@ def log(x):
     #return np.array([0.0 if e <= 0.0 else np.log(e)+inf for e in x])
     return np.array([-12 if e <= 1e-12 else np.log(e) for e in x])
 
+
+def non_zero(x):
+    return np.array( [ tol if abs(e) <= tol else e for e in x ] )
+
+
+#print( 1.0 / non_zero( [ -0.000000000001, -2, 4, -1e-12 ] ) )
+#sys.exit()
 
 def reciprocal(x):
     return np.array([inf if e <= 0.0 else 1.0 / e for e in x])
@@ -19,7 +26,7 @@ def w(x, y):
     x = np.array(x)
     y = np.array(y)
     z = -x-y
-    return np.exp(z/100.0)
+    return np.exp(z/144.0)
 
 def f(x):
     #shift = 500

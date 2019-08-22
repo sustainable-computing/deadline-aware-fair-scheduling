@@ -7,23 +7,24 @@ import DSSStartup
 from tqdm import tqdm
 from matplotlib import pyplot as plt
 
-result_path = 'result/500_mix_f.txt'
+result_path = 'result/test_500.txt'
 base_load_path = 'base_load/10_min/'
-env_path = 'env/500_mix.txt'
+env_path = 'env/test_500.txt'
 
 DSSObj = DSSStartup.dssstartup('master33Full.dss')
 
-tol = 0.0001
+tol = 0.5
 
 result = util.load_dict(result_path)
 env = util.load_dict(env_path)
 
-slot = 119
+slot = 102
+rho = 1000.0
 #print(result['central'][slot]['x'])
 connected = result['central'][slot]['connected']
-#print('connected')
-#print(len(connected))
-factor = 0.1
+print('connected')
+print(len(connected))
+factor = 0.3
 
 n_slot_per_hr = 6
 h = slot//n_slot_per_hr
@@ -97,7 +98,7 @@ def get_TAU(whole=0):
 
 def get_load_nabla(T,A,U,LB,mu):
 
-    x = np.minimum(np.maximum(LB, w/np.dot(T.T, (mu+tol)**2)), get_UB())
+    x = np.minimum(np.maximum(LB, w/util.non_zero(np.dot(T.T, mu**2))), get_UB())
 
     ev_power = np.zeros(env['evNumber'])
     for j in range(0, len(connected)):
@@ -108,9 +109,11 @@ def get_load_nabla(T,A,U,LB,mu):
 
     load = np.array([load[e] for e in U])
 
-    nabla = 2 * mu * np.array([nabla[e] for e in U])
+    rating_load = np.array([nabla[e] for e in U])
 
-    return (load, nabla, x)
+    nabla = 2 * mu * rating_load
+
+    return (load, nabla, x, rating_load)
     
 '''
 def get_mu(mu_k, load_k, load_k_1, nabla_k, nabla_k_1, gamma=None):
@@ -120,10 +123,11 @@ def get_mu(mu_k, load_k, load_k_1, nabla_k, nabla_k_1, gamma=None):
         mu = mu_k - gamma * ((load_k-load_k_1)/(nabla_k-nabla_k_1))*nabla_k
     return mu
 '''
-def get_mu(mu_k, mu_k_1, load_k, load_k_1, nabla_k, gamma=None):
-    rating_load = nabla_k / (mu_k+tol)
-    hessian = rating_load - 2 * mu_k * ((load_k-load_k_1)/(mu_k-mu_k_1+tol)) + tol
-    hessian = factor / hessian
+def get_mu(mu_k, mu_k_1, load_k, load_k_1, nabla_k, rating_load, gamma=None):
+    #rating_load = nabla_k / (mu_k+tol)
+    hessian = rating_load - 2 * mu_k * ((load_k-load_k_1)/util.non_zero((mu_k-mu_k_1+tol)))
+    #hessian = np.array([util.tol if e <= util.tol else e for e in hessian])
+    hessian = factor / util.non_zero(hessian) 
     if gamma==None: 
         mu = mu_k - hessian * nabla_k
     else:
@@ -132,15 +136,20 @@ def get_mu(mu_k, mu_k_1, load_k, load_k_1, nabla_k, gamma=None):
     return mu
 
 T, A, U = get_TAU()
-scale = 1e-5
+scale = 1e-4
 legend = []
 
-for name in ['diag','gpa']:
+for name in ['gpa']:
     gammas = []
     iters = []
     for gamma in tqdm(range(5, 100)):
         gammas.append(gamma)
+        #rho = 1.0 / (gamma*scale)
         n_iter = 0
+        
+        u_k = np.zeros(len(A))
+        y_k = np.zeros(len(A))
+        lamda_k = np.ones(len(A))
 
         lamda = np.ones(len(A))
         x = np.zeros(len(connected))
@@ -148,12 +157,12 @@ for name in ['diag','gpa']:
 
         if name == 'diag':
             ##################################################################
-            mu_k_1 = 1.0*np.ones(len(A))
+            mu_k_1 = 0.0*np.ones(len(A))
             load_k_1 = np.zeros(len(A))
         
             mu_k = np.ones(len(A))
         
-            (load_k, nabla_k, _) = get_load_nabla(T,A,U,LB,mu_k)
+            (load_k, nabla_k, _, rating_load) = get_load_nabla(T,A,U,LB,mu_k)
             #lamda_k_1 = np.zeros(len(lamda))
             #lamda_k = np.copy( lamda )
             '''
@@ -183,12 +192,12 @@ for name in ['diag','gpa']:
             if name == 'diag':
                 #lamda = lamda - util.lbfgs_get_direction(history, g_k)
                 #lamda = 2 * rating_load - 2 * lamda_k * ( ( load_k - load_k_1 ) / ( lamda_k - lamda_k_1 + 1e-7) )
-                mu = get_mu(mu_k, mu_k_1, load_k, load_k_1, nabla_k)
+                mu = get_mu(mu_k, mu_k_1, load_k, load_k_1, nabla_k, rating_load)
 
                 load_k_1 = np.copy(load_k)
                 mu_k_1 = np.copy(mu_k)
                 
-                (load_k, nabla_k, x) = get_load_nabla(T,A,U,LB,mu)
+                (load_k, nabla_k, x, rating_load) = get_load_nabla(T,A,U,LB,mu)
                 
                 mu_k = np.copy(mu)
                 
@@ -200,7 +209,8 @@ for name in ['diag','gpa']:
                 #lamda = lamda - gamma*scale*g
                 #x = np.minimum(np.maximum(LB, w/np.dot(T.T, (lamda+1e-7)**2)), get_UB())
             else:
-                x = np.minimum(np.maximum(LB, w/np.dot(T.T, (lamda+1e-7))), get_UB())
+                x = np.minimum(np.maximum(LB, w/util.non_zero( np.dot(T.T, lamda_k) )), get_UB())
+                #x = np.minimum(np.maximum(LB, w/np.dot(T.T, (lamda+1e-7))), get_UB())
         
 
             ev_power = np.zeros(env['evNumber'])
@@ -215,7 +225,14 @@ for name in ['diag','gpa']:
                 g = np.array(env['transRating']) - get_trans_load(ev_power) 
                 g = np.array([g[e] for e in U])
                 #print(gamma*scale)
-                lamda = np.maximum(0.0, lamda - gamma*scale*g)
+                #lamda = np.maximum(0.0, lamda - gamma*scale*g)
+                lamda = -g/rho + y_k - u_k
+                y = np.maximum(0.0, lamda+u_k)
+                u = u_k + lamda - y
+
+                lamda_k = np.copy(lamda)
+                y_k = np.copy(y)
+                u_k = np.copy(u)
             '''
             if name == 'diag':
                 #g = np.array(env['transRating']) - load_k
@@ -251,6 +268,7 @@ for name in ['diag','gpa']:
                 break
             
             '''
+            
             c = sum(result['central'][slot]['ev_power'])
             d = sum(ev_power)
 

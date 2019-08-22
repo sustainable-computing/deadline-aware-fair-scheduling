@@ -8,7 +8,9 @@ from tqdm import tqdm
 from algo import algo
 
 from central_algo import central_algo
-from decentral_algo import decentral_algo
+from gpa_algo import gpa_algo
+from diag_algo import diag_algo
+from admm_algo import admm_algo
 from base_line_algo import base_line_algo
 from base_load_algo import base_load_algo
 
@@ -54,24 +56,36 @@ P = bl_scale*np.array(PQ_dict['P'])
 Q = bl_scale*np.array(PQ_dict['Q'])
 
 algo_list = {}
+decentral_list = []
 for key in simu_params['algo']:
-    if simu_params['algo'][key]['type']=='central_algo':
+    if simu_params['algo'][key]['type']=='decentral_algo':
+        decentral_list.append(key)
+
+    if key=='central':
          obj = central_algo(DSSObj, env, P, Q, start_hr=simu_params['start_hr'], slot_len_in_min=simu_params['slot_len'], mode=simu_params['mode'], params=simu_params['algo'][key]['params'])
-    elif simu_params['algo'][key]['type']=='decentral_algo':
-         obj = decentral_algo(DSSObj, env, P, Q, start_hr=simu_params['start_hr'], slot_len_in_min=simu_params['slot_len'], mode=simu_params['mode'], params=simu_params['algo'][key]['params'])
-    elif simu_params['algo'][key]['type']=='base_line_algo':
-         obj = base_line_algo(DSSObj, env, P, Q, start_hr=simu_params['start_hr'], slot_len_in_min=simu_params['slot_len'], mode=simu_params['mode'], params=simu_params['algo'][key]['params'])
-    elif simu_params['algo'][key]['type']=='base_load_algo':
+
+    elif key=='gpa':
+         obj = gpa_algo(DSSObj, env, P, Q, start_hr=simu_params['start_hr'], slot_len_in_min=simu_params['slot_len'], mode=simu_params['mode'], params=simu_params['algo'][key]['params'])
+         
+    elif key=='diag':
+         obj = diag_algo(DSSObj, env, P, Q, start_hr=simu_params['start_hr'], slot_len_in_min=simu_params['slot_len'], mode=simu_params['mode'], params=simu_params['algo'][key]['params'])
+         
+    elif key=='admm':
+         obj = admm_algo(DSSObj, env, P, Q, start_hr=simu_params['start_hr'], slot_len_in_min=simu_params['slot_len'], mode=simu_params['mode'], params=simu_params['algo'][key]['params'])
+
+    elif key=='base_load':
          obj = base_load_algo(DSSObj, env, P, Q, start_hr=simu_params['start_hr'], slot_len_in_min=simu_params['slot_len'], mode=simu_params['mode'], params=simu_params['algo'][key]['params'])
 
-    algo_list[key] = obj
+    elif key=='llf' or key=='edf':
+         obj = base_line_algo(DSSObj, env, P, Q, start_hr=simu_params['start_hr'], slot_len_in_min=simu_params['slot_len'], mode=simu_params['mode'], params=simu_params['algo'][key]['params'])
 
+    algo_list[key] = obj
 
 result = {}
 decentral_flag = False
 for key in algo_list:
     result[key] = {}
-    if key=='decentral':
+    if key in decentral_list:
         decentral_flag= True
 #result['decentral'] = {}
 
@@ -84,14 +98,15 @@ for h in tqdm(range(simu_params['start_hr'], simu_params['end_hr'])):
 
     for t in range(0, n_slots):
         for key in algo_list:
-            if key == 'decentral':
+            if key in decentral_list:
                continue
 
             index = h*n_slots + t
             result[key][index] = algo_list[key].update(P,Q)
 
             if key == 'central' and decentral_flag==True:
-               result['decentral'][index] = algo_list['decentral'].update(P,Q, result['central'][index])
+                for dli in decentral_list:
+                    result[dli][index] = algo_list[dli].update(P,Q, result['central'][index])
 
 """
 'decentral':{'type':'decentral_algo', 'params':{'x':True, 'theta':0.8, 'step_factor':200, 'tol':0.05, 'max_iter':200}},

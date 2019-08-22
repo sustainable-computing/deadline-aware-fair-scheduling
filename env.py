@@ -28,9 +28,9 @@ var['evNodeNumber'] = evNodeNumber.tolist()
 #X Type 2: dishonest risk-taker: claimed duration = actual duration - std(45 min)
 #evDriverType = np.random.randint(0, 3, evNumber)
 
-#evDriverType = np.random.randint(0, 2, evNumber)
+evDriverType = np.random.randint(0, 2, evNumber)
 #evDriverType = np.zeros(evNumber, dtype=int)
-evDriverType = np.ones(evNumber, dtype=int)
+#evDriverType = np.ones(evNumber, dtype=int)
 var['evDriverType'] = evDriverType.tolist()
 
 # Std for type: 0, 1, 2
@@ -133,7 +133,7 @@ var['evDuration'] = np.round(evDuration*60).tolist()
 #discp_type = [0, 2700, 3600] # In minutes
 #var['discrepancy'] = [discp_type[evDriverType[i]] for i in range(0, evNumber)] 
 discrepancy = evDuration - evClaimedDuration
-var['discrepancy'] = discrepancy.tolist()
+var['discrepancy'] = np.round(discrepancy*60).tolist()
 # Transformer rating for each phase in kVA
 transRating=[2500,2500,2500,100,100,100,100,100,100,100,100,100,75,75,75,75,75,75,166.67,166.67,166.67,166.67,166.67,
 166.67,50,50,50,75,75,75,75,75,75,75,75,75,75,75,75,100,100,100,75,75,75,75,75,75,50,50,50,100,100,100,100,100,100,75,

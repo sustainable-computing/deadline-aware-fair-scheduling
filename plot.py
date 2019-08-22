@@ -42,18 +42,18 @@ def fig_trans_load_vs_time(result_path, trans, env=None):
     #fig.add_subplot(221)
     linewidth=1.0
     legend = []
-    y = 3*env['transRating'][3*trans]*np.ones(len(x))
+    y = 30*np.ones(len(x))
     
-    legend.append('rating')
+    legend.append('max')
     plt.plot(x,y,'--',linewidth=linewidth)
 
     for key in result:
-        if key=='llf' or key=='edf':
+        if key=='llf' or key=='edf' or key=='central' or key=='base_load':
             continue
         y = []
         legend.append(key)
         for i in x:
-            y.append(result[key][i]['trans_load'][(3 * trans + 0)] + result[key][i]['trans_load'][(3 * trans + 1)] + result[key][i]['trans_load'][(3 * trans + 2)])
+            y.append(result[key][i]['n_iter'])
 
         y = np.array(y)
         if key=='base_load':
@@ -63,9 +63,9 @@ def fig_trans_load_vs_time(result_path, trans, env=None):
 
     plt.legend(legend)
 
-    plt.title('Transformer (#'+ str(trans)+')'+' Loading')
+    plt.title('# of iterations required for 95% convergence')
     plt.xlabel('Time')
-    plt.ylabel('kVA')
+    plt.ylabel('# of iterations')
  
     plt.xticks(rotation=30)
     plt.show()
@@ -110,8 +110,8 @@ def fig_trans_load_subplot(result_path, trans_list, env):
         plt.plot(x,y,'--',linewidth=linewidth)
 
         for key in result:
-            #if key=='llf' or key=='edf':
-            #    continue
+            if key=='llf' or key=='edf':
+                continue
             y = []
             legend.append(key)
             for i in x:
@@ -135,8 +135,8 @@ def fig_trans_load_subplot(result_path, trans_list, env):
         #plt.yticks([])
         
         ii += 1
-    #plt.show()
-    plt.savefig('trans1.png')
+    plt.show()
+    #plt.savefig('trans1.png')
 
 def autolabel(rects, ax, xpos='center'):
     """
@@ -251,7 +251,7 @@ def fig_compare(result_path, user_type, last_slot, env):
     fig.tight_layout()
 
     #plt.show()
-    plt.savefig('compare_0_all_conv')
+    plt.savefig('compare_0_all_risk')
 
 
 def fig_soc_vs_time(result_path, usr_type, algo, slot=60):
@@ -323,7 +323,7 @@ if __name__ == '__main__':
     
     #fig_soc_vs_time(simu_params['save_path'], (env['evDriverType']), algo='central')
     #fig_trans_load_vs_time(simu_params['save_path'], trans=0, env=env)
-    #fig_trans_load_subplot(simu_params['save_path'], trans_list=[0], env=env)
-    fig_compare(simu_params['save_path'], 0, 143, env)
+    fig_trans_load_subplot(simu_params['save_path'], trans_list=[2,1,0], env=env)
+    #fig_compare(simu_params['save_path'], 1, 143, env)
     #fig_conv_ana('result/meta_large.txt')
 
