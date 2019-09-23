@@ -7,7 +7,8 @@ import utility as util
 class diag_algo(algo):
     def get_load_nabla(self, T,A,U,LB,UB,connected,P,Q,w,mu):
 
-        x = np.minimum(np.maximum(LB, w/util.non_zero(np.dot(T.T, mu**2))), UB)
+        #x = np.minimum(np.maximum(LB, w/util.non_zero(np.dot(T.T, mu**2))), UB)
+        x = np.minimum(np.maximum(LB, w/util.non_zero(np.dot(T.T, mu))), UB)
 
         ev_power = np.zeros(self.env['evNumber'])
         for j in range(0, len(connected)):
@@ -20,17 +21,21 @@ class diag_algo(algo):
 
         rating_load = np.array([nabla[e] for e in U])
 
-        nabla = 2 * mu * rating_load
+        #nabla = 2 * mu * rating_load
+        nabla = rating_load
 
         return (load, nabla, x, rating_load)
 
     def get_mu(self, mu_k, mu_k_1, load_k, load_k_1, nabla_k, rating_load, gamma=None):
         #rating_load = nabla_k / (mu_k+tol)
-        hessian = np.absolute(rating_load - 2 * mu_k * ((load_k-load_k_1)/util.non_zero((mu_k-mu_k_1+0.5))))
+        #hessian = np.absolute(rating_load - 2 * mu_k * ((load_k-load_k_1)/util.non_zero((mu_k-mu_k_1+0.5))))
+        hessian =  0.1+np.absolute( ( (load_k-load_k_1)/util.non_zero((mu_k-mu_k_1)) ) )
+        #print(hessian)
         #hessian = np.array([util.tol if e <= util.tol else e for e in hessian])
-        hessian = 0.3 / util.non_zero(hessian) 
+        hessian = 0.1 / util.non_zero(hessian) 
         if gamma==None: 
-            mu = mu_k - hessian * nabla_k
+            #mu = mu_k - hessian * nabla_k
+            mu = np.maximum(0,  mu_k - hessian * nabla_k )
         else:
             #mu = rating_load - 2 * mu_k * ((load_k-load_k_1)/(mu_k-mu_K_1))
             mu = mu_k - gamma * hessian * nabla_k
@@ -72,10 +77,10 @@ class diag_algo(algo):
             
             gamma = 0.008
 
-            mu_k_1 = 0.0*np.ones(len(A))
+            mu_k_1 = 1000*np.ones(len(A))
             load_k_1 = np.zeros(len(A))
         
-            mu_k = 1.0*np.ones(len(A))
+            mu_k = 999*np.ones(len(A))
         
             (load_k, nabla_k, _, rating_load) = self.get_load_nabla(T,A,U,LB,UB,connected,P,Q,w,mu_k)
             #print('gamma')
@@ -94,6 +99,7 @@ class diag_algo(algo):
                 mu_k_1 = np.copy(mu_k)
                 
                 (load_k, nabla_k, x, rating_load) = self.get_load_nabla(T,A,U,LB,UB,connected,P,Q,w,mu)
+                x *= self.max_rate_scaler
                 
                 mu_k = np.copy(mu)
 

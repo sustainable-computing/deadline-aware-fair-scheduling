@@ -40,10 +40,11 @@ class central_algo(algo):
             #x = lb.solve(self.get_driver_type(connected), self.get_claimed(connected), self.get_over_time(connected), self.get_UB(connected), A, T)
             #w = util.f(self.get_driver_type(connected)) * util.g(self.get_laxity(connected, scale=0.0))
             w = util.w(self.get_discrepancy(connected), self.get_laxity(connected, scale=0.0))
+            #print(w)
             #laxity = self.get_laxity(connected)
             #w = w * (144-laxity)
 
-            x = lb.solve(w=w, UB=self.get_UB(connected), A=A, T=T)
+            x = lb.solve(w=w, UB=self.get_UB(connected), A=A, T=T, scale=self.max_rate_scaler)
             #print(x)
             #x = primal.solve(np.zeros(len(connected)), 10*np.ones(len(connected)), A, T)
             #x = primal.solve(np.zeros(len(connected)), self.get_UB(connected)-LB+util.tol, A, T)

@@ -17,15 +17,7 @@
 
 'central':{'type':'central_algo', 'params':{'theta':0.8}},
 
-'admm':{'type':'decentral_algo', 'params':{'tol':0.05, 'max_iter':30}},
-
-'gpa':{'type':'decentral_algo', 'params':{'tol':0.05, 'max_iter':30}},
-
-'diag':{'type':'decentral_algo', 'params':{'tol':0.05, 'max_iter':30}},
-
-'llf':{'type':'base_line_algo', 'params':{'value':'llf'}},
-
-'edf':{'type':'base_line_algo', 'params':{'value':'edf'}},
+'diag':{'type':'decentral_algo', 'params':{'tol':0.01, 'max_iter':200}},
 
 'base_load':{'type':'base_load_algo', 'params':{}}
 }

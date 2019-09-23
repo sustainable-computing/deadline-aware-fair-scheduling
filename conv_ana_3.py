@@ -6,7 +6,13 @@ import DSSStartup
 
 from tqdm import tqdm
 from matplotlib import pyplot as plt
+'''
+import sys
 
+i = 1
+print(str(i).zfill(5))
+sys.exit()
+'''
 result_path = 'result/test_500.txt'
 base_load_path = 'base_load/10_min/'
 env_path = 'env/test_500.txt'
@@ -18,13 +24,13 @@ tol = 0.5
 result = util.load_dict(result_path)
 env = util.load_dict(env_path)
 
-slot = 102
+slot = 109
 rho = 1000.0
 #print(result['central'][slot]['x'])
 connected = result['central'][slot]['connected']
 print('connected')
 print(len(connected))
-factor = 0.3
+factor = 0.1
 
 n_slot_per_hr = 6
 h = slot//n_slot_per_hr
@@ -42,7 +48,7 @@ def get_driver_type():
     return np.array(driver_type)
     
 #w = util.f(get_driver_type())
-w = result['central'][slot]['w']
+w = np.array(result['central'][slot]['w'])+10000
 
 def get_trans_load(ev_power): # In kVA
     DSSCircuit = RunPF.runPF(DSSObj, P[:, h%n_slot_per_hr], Q[:, h%n_slot_per_hr], env['evNodeNumber'], ev_power)
@@ -55,6 +61,7 @@ def get_trans_load(ev_power): # In kVA
     trans_loads = [np.sqrt(trans_loads[i]**2+trans_loads[i+1]**2) for i in range(0,len(trans_loads),2)]
     return(np.array(trans_loads))
     
+    #        connected_ = n
 def get_UB():
     return 8.0*np.ones(len(connected))
     
@@ -98,7 +105,8 @@ def get_TAU(whole=0):
 
 def get_load_nabla(T,A,U,LB,mu):
 
-    x = np.minimum(np.maximum(LB, w/util.non_zero(np.dot(T.T, mu**2))), get_UB())
+    #x = np.minimum(np.maximum(LB, w/util.non_zero(np.dot(T.T, mu**2))), get_UB())
+    x = np.minimum(np.maximum(LB, w/util.non_zero(np.dot(T.T, mu))), get_UB())
 
     ev_power = np.zeros(env['evNumber'])
     for j in range(0, len(connected)):
@@ -111,7 +119,8 @@ def get_load_nabla(T,A,U,LB,mu):
 
     rating_load = np.array([nabla[e] for e in U])
 
-    nabla = 2 * mu * rating_load
+    #nabla = 2 * mu * rating_load
+    nabla = rating_load
 
     return (load, nabla, x, rating_load)
     
@@ -125,21 +134,25 @@ def get_mu(mu_k, load_k, load_k_1, nabla_k, nabla_k_1, gamma=None):
 '''
 def get_mu(mu_k, mu_k_1, load_k, load_k_1, nabla_k, rating_load, gamma=None):
     #rating_load = nabla_k / (mu_k+tol)
-    hessian = rating_load - 2 * mu_k * ((load_k-load_k_1)/util.non_zero((mu_k-mu_k_1+tol)))
+    #hessian = rating_load - 2 * mu_k * ((load_k-load_k_1)/util.non_zero((mu_k-mu_k_1+tol)))
+    hessian = -1.0*((load_k-load_k_1) / util.non_zero(mu_k-mu_k_1))
     #hessian = np.array([util.tol if e <= util.tol else e for e in hessian])
     hessian = factor / util.non_zero(hessian) 
     if gamma==None: 
-        mu = mu_k - hessian * nabla_k
+        #mu = mu_k - hessian * nabla_k
+        #mu = np.maximum(0.0, mu_k - hessian * nabla_k)
+        mu = np.abs(mu_k - hessian * nabla_k)
     else:
         #mu = rating_load - 2 * mu_k * ((load_k-load_k_1)/(mu_k-mu_K_1))
-        mu = mu_k - gamma * hessian * nabla_k
+        #mu = mu_k - gamma * hessian * nabla_k
+        mu = np.maximum(0.0, mu_k - gamma * hessian * nabla_k)
     return mu
 
 T, A, U = get_TAU()
-scale = 1e-4
+scale = 1e-3
 legend = []
 
-for name in ['gpa']:
+for name in ['diag']:
     gammas = []
     iters = []
     for gamma in tqdm(range(5, 100)):
@@ -157,7 +170,7 @@ for name in ['gpa']:
 
         if name == 'diag':
             ##################################################################
-            mu_k_1 = 0.0*np.ones(len(A))
+            mu_k_1 = np.zeros(len(A))
             load_k_1 = np.zeros(len(A))
         
             mu_k = np.ones(len(A))
@@ -198,7 +211,7 @@ for name in ['gpa']:
                 mu_k_1 = np.copy(mu_k)
                 
                 (load_k, nabla_k, x, rating_load) = get_load_nabla(T,A,U,LB,mu)
-                
+                #print(mu_k)
                 mu_k = np.copy(mu)
                 
                 #lamda = lamda_k - ( ( load_k-load_k_1 )/( nabla_k-nabla_k_1 ) ) * nabla_k
@@ -264,7 +277,7 @@ for name in ['gpa']:
             sub[1] = temp[0]+temp[1]+temp[2]
             
             #print(abs(sub[1]-sub[0])/sub[0])
-            if abs(sub[1]-sub[0]) <= 0.05*sub[0]:
+            if abs(sub[1]-sub[0]) <= 0.20*sub[0]:
                 break
             
             '''
@@ -272,7 +285,7 @@ for name in ['gpa']:
             c = sum(result['central'][slot]['ev_power'])
             d = sum(ev_power)
 
-            if abs(d-c) <= 0.05*c:
+            if abs(d-c) <= 0.01*c:
                 break 
             
             #if np.allclose(x, result['central'][slot]['x'], atol=0.0, rtol=0.05)==True:

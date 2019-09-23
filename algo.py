@@ -28,7 +28,10 @@ class algo:
 
         #self.max_rate = 1+60.0*np.array(env['demand']) # In kWmin
         self.max_rate = 8.0*np.ones(env['evNumber']) # In kW
+        self.max_rate_scaler = 1.0
 
+        #self.remaining_demand /= self.max_rate_scaler
+        
         self.arrival = np.round(np.array(self.env['evArrival'])/slot_len_in_min)
         self.duration = np.round(np.array(self.env['evDuration'])/slot_len_in_min)
         self.claimed_duration = np.round(np.array(self.env['evClaimedDuration'])/slot_len_in_min)
@@ -105,7 +108,7 @@ class algo:
         
     def get_available(self, trans_loads):
 
-        return self.trans_accu*np.maximum(0.0, np.array(self.env['transRating']) - trans_loads)
+        return self.trans_accu*np.maximum(0.0, np.array(self.env['transRating']) - trans_loads)/self.max_rate_scaler
     
     def get_UB(self, connected):
         #temp = np.minimum(self.remaining_demand/self.slot_len_in_min, self.max_rate)
