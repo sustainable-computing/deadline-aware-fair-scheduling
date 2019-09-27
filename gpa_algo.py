@@ -39,11 +39,11 @@ class gpa_algo(algo):
             #gamma = (2.0*self.params['step_factor'])/(m*L*S+util.tol)
             #gamma = 0.00060483158055174284
             
-            gamma = 0.0000001
+            gamma = 0.001
             #print('gamma')
             #print(gamma)
             #lamda = np.zeros(len(A))
-            lamda = np.ones(len(A))
+            lamda = 999*np.ones(len(A))
             #print(np.dot(T.T, lamda))
             x = np.zeros(len(connected))
             

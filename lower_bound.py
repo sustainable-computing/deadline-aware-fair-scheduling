@@ -9,7 +9,7 @@ def solve(w, UB, A, T, scale=1.0):
 
     #print(A)
     #print(w)
-    obj = cp.Maximize(sum(np.diag(w) * cp.log(100*z + util.tol)))
+    obj = cp.Maximize(sum(np.diag(w) * cp.log(z + util.tol)))
     #print(T)
     #print(A)
     constraints = [0 <= z, z <= UB, T * z <= A]

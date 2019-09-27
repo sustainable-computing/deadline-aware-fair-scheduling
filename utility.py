@@ -26,7 +26,7 @@ def w(x, y):
     x = np.array(x)
     y = np.array(y)
     z = -x-y
-    return 1000 + np.exp(z/144.0)
+    return np.exp(z/144.0)
 
 def f(x):
     #shift = 500

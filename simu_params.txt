@@ -19,6 +19,8 @@
 
 'diag':{'type':'decentral_algo', 'params':{'tol':0.01, 'max_iter':200}},
 
+'gpa':{'type':'decentral_algo', 'params':{'tol':0.01, 'max_iter':200}},
+
 'base_load':{'type':'base_load_algo', 'params':{}}
 }
 }
