@@ -24,7 +24,7 @@ tol = 0.5
 result = util.load_dict(result_path)
 env = util.load_dict(env_path)
 
-slot = 109
+slot = 140
 rho = 1000.0
 #print(result['central'][slot]['x'])
 connected = result['central'][slot]['connected']
@@ -48,7 +48,7 @@ def get_driver_type():
     return np.array(driver_type)
     
 #w = util.f(get_driver_type())
-w = np.array(result['central'][slot]['w'])+10000
+w = np.array(result['central'][slot]['w'])
 
 def get_trans_load(ev_power): # In kVA
     DSSCircuit = RunPF.runPF(DSSObj, P[:, h%n_slot_per_hr], Q[:, h%n_slot_per_hr], env['evNodeNumber'], ev_power)
@@ -135,9 +135,9 @@ def get_mu(mu_k, load_k, load_k_1, nabla_k, nabla_k_1, gamma=None):
 def get_mu(mu_k, mu_k_1, load_k, load_k_1, nabla_k, rating_load, gamma=None):
     #rating_load = nabla_k / (mu_k+tol)
     #hessian = rating_load - 2 * mu_k * ((load_k-load_k_1)/util.non_zero((mu_k-mu_k_1+tol)))
-    hessian = -1.0*((load_k-load_k_1) / util.non_zero(mu_k-mu_k_1))
+    hessian = 0.001 + gamma * np.absolute((load_k-load_k_1) / util.non_zero(mu_k-mu_k_1))
     #hessian = np.array([util.tol if e <= util.tol else e for e in hessian])
-    hessian = factor / util.non_zero(hessian) 
+    hessian = 1.0 / util.non_zero(hessian) 
     if gamma==None: 
         #mu = mu_k - hessian * nabla_k
         #mu = np.maximum(0.0, mu_k - hessian * nabla_k)
@@ -149,10 +149,10 @@ def get_mu(mu_k, mu_k_1, load_k, load_k_1, nabla_k, rating_load, gamma=None):
     return mu
 
 T, A, U = get_TAU()
-scale = 1e-3
+scale = 1e-4
 legend = []
 
-for name in ['diag']:
+for name in ['diag', 'gpa']:
     gammas = []
     iters = []
     for gamma in tqdm(range(5, 100)):
@@ -160,20 +160,20 @@ for name in ['diag']:
         #rho = 1.0 / (gamma*scale)
         n_iter = 0
         
-        u_k = np.zeros(len(A))
-        y_k = np.zeros(len(A))
-        lamda_k = np.ones(len(A))
+        #u_k = np.zeros(len(A))
+        #y_k = np.zeros(len(A))
+        #lamda_k = np.ones(len(A))
 
-        lamda = np.ones(len(A))
+        lamda = 100*np.ones(len(A))
         x = np.zeros(len(connected))
         LB = np.zeros(len(connected))
 
         if name == 'diag':
             ##################################################################
-            mu_k_1 = np.zeros(len(A))
+            mu_k_1 = 101*np.ones(len(A))
             load_k_1 = np.zeros(len(A))
         
-            mu_k = np.ones(len(A))
+            mu_k = 100*np.ones(len(A))
         
             (load_k, nabla_k, _, rating_load) = get_load_nabla(T,A,U,LB,mu_k)
             #lamda_k_1 = np.zeros(len(lamda))
@@ -199,13 +199,13 @@ for name in ['diag']:
             '''
             ###################################################################
 
-        for i in range(0, 200):
+        for i in range(0, 100):
             n_iter = i+1
             
             if name == 'diag':
                 #lamda = lamda - util.lbfgs_get_direction(history, g_k)
                 #lamda = 2 * rating_load - 2 * lamda_k * ( ( load_k - load_k_1 ) / ( lamda_k - lamda_k_1 + 1e-7) )
-                mu = get_mu(mu_k, mu_k_1, load_k, load_k_1, nabla_k, rating_load)
+                mu = get_mu(mu_k, mu_k_1, load_k, load_k_1, nabla_k, rating_load, gamma*scale)
 
                 load_k_1 = np.copy(load_k)
                 mu_k_1 = np.copy(mu_k)
@@ -222,7 +222,7 @@ for name in ['diag']:
                 #lamda = lamda - gamma*scale*g
                 #x = np.minimum(np.maximum(LB, w/np.dot(T.T, (lamda+1e-7)**2)), get_UB())
             else:
-                x = np.minimum(np.maximum(LB, w/util.non_zero( np.dot(T.T, lamda_k) )), get_UB())
+                x = np.minimum(np.maximum(LB, w/util.non_zero( np.dot(T.T, lamda) )), get_UB())
                 #x = np.minimum(np.maximum(LB, w/np.dot(T.T, (lamda+1e-7))), get_UB())
         
 
@@ -238,14 +238,14 @@ for name in ['diag']:
                 g = np.array(env['transRating']) - get_trans_load(ev_power) 
                 g = np.array([g[e] for e in U])
                 #print(gamma*scale)
-                #lamda = np.maximum(0.0, lamda - gamma*scale*g)
-                lamda = -g/rho + y_k - u_k
-                y = np.maximum(0.0, lamda+u_k)
-                u = u_k + lamda - y
+                lamda = np.maximum(0.0, lamda - gamma*scale*g)
+                #lamda = -g/rho + y_k - u_k
+                #y = np.maximum(0.0, lamda+u_k)
+                #u = u_k + lamda - y
 
-                lamda_k = np.copy(lamda)
-                y_k = np.copy(y)
-                u_k = np.copy(u)
+                #lamda_k = np.copy(lamda)
+                #y_k = np.copy(y)
+                #u_k = np.copy(u)
             '''
             if name == 'diag':
                 #g = np.array(env['transRating']) - load_k
@@ -285,7 +285,7 @@ for name in ['diag']:
             c = sum(result['central'][slot]['ev_power'])
             d = sum(ev_power)
 
-            if abs(d-c) <= 0.01*c:
+            if abs(d-c) <= 0.05*c:
                 break 
             
             #if np.allclose(x, result['central'][slot]['x'], atol=0.0, rtol=0.05)==True:
@@ -307,7 +307,7 @@ for name in ['diag']:
 
 plt.legend(legend)
 plt.title('95% Convergence Analysis of Decentral Algo')
-plt.xlabel('step-size ($x10^{-5}$)')
+plt.xlabel('step-size ($x10^{-4}$)')
 plt.ylabel('# of iterations')
 
 plt.show()

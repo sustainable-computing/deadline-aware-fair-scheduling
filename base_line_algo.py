@@ -28,9 +28,9 @@ class base_line_algo(algo):
             #print(j)
             #print(k)
             if B[j]>=UB[index] and B[k]>=UB[index]:
-                power[index]=0.95*UB[index]
+                power[index]=0.9*UB[index]
             else:
-                power[index]=0.95*np.minimum(B[j],B[k])
+                power[index]=0.9*np.minimum(B[j],B[k])
             #print('bj')
             #print(B[j])
             #print('bk')

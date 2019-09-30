@@ -146,89 +146,150 @@ def autolabel(rects, ax, xpos='center'):
     the bar. It can be one of the following {'center', 'right', 'left'}.
     """
 
-    ha = {'center': 'center', 'right': 'left', 'left': 'right'}
-    offset = {'center': 0, 'right': 1, 'left': -1}
-
+    #ha = {'center': 'center', 'right': 'left', 'left': 'right'}
+    
+    #offset = {'center': 0, 'right': 1, 'left': -1}
+    
+    labels = ["{}".format(round(i.get_height(),2)) for i in rects]
+    #print(labels)
+    
+    for rect, label in zip(rects, labels):
+        height = round(rect.get_height(), 2)
+        ax.text(rect.get_x() + rect.get_width() / 2, height + 10, label,
+                ha='center', va='top')
+    '''
     for rect in rects:
         height = round(rect.get_height(), 2)
         ax.annotate('{}'.format(height),
                     xy=(rect.get_x() + rect.get_width() / 2, height),
-                    xytext=(offset[xpos]*3, 3),  # use 3 points offset
+                    xytext=(offset[xpos]*3, offset[xpos]*height),  # use 3 points offset
                     textcoords="offset points",  # in both directions
                     ha=ha[xpos], va='bottom')
+    '''
 
-
-def fig_compare(result_path, user_type, last_slot, env):
+def fig_compare(result_path, last_slot, env):
     result = util.load_dict(result_path)
     #men_means, men_std = (20, 35, 30, 35, 27), (2, 3, 4, 1, 2)
     #women_means, women_std = (25, 32, 34, 20, 25), (3, 5, 2, 3, 3)
-    jain_means = []
-    jain_std = []
-    
-    soc_means = []
-    soc_std = []
-    
-    if user_type==-1:
-        battery = np.array(env['battery'])
-    else:
-        battery = np.array([env['battery'][i] for i in range(0, env['evNumber']) if env['evDriverType'][i]==user_type])
-    #print(len(battery))
-    
-    algo_name = []
-    for key in result:
-        if key == 'base_load':
-            continue
-        algo_name.append(key)
-        temp = []
-        for subKey in result[key]:
-            #if key=='central':
-                #print(result[key][subKey]['x'])
-            if user_type==-1:
-                value = result[key][subKey]['x']
-            else:
-                c = result[key][subKey]['connected']
-                l = len(c)
-                value = [result[key][subKey]['x'][i] for i in range(0,l) if env['evDriverType'][c[i]]==user_type]
-                '''
-                if 'w' in result[key][subKey]:
-                    w = [result[key][subKey]['w'][i] for i in range(0,l) if env['evDriverType'][c[i]]==user_type]
-                else:
-                    w = np.ones(len(value)).tolist()
-                '''
-            temp.append(util.jain_index(value))
+    fig, ax = plt.subplots()
+    for user_type in [0,1]:
 
-        temp = np.array(temp)
-
-        jain_means.append(np.average(temp))
-        jain_std.append(np.std(temp))
+        jain_means = []
+        jain_std = []
+        
+        soc_means = []
+        soc_std = []
 
         if user_type==-1:
-            remaining_demand = np.array(result[key][last_slot]['remaining_demand'])
+            battery = np.array(env['battery'])
         else:
-            remaining_demand = np.array([result[key][last_slot]['remaining_demand'][i] for i in range(0, env['evNumber']) if env['evDriverType'][i]==user_type])
-
-        #print(key)
-        #print(remaining_demand)
-
-        temp = (battery - remaining_demand)/battery
-        count = 0
-        #print(key)
-        #print(temp)
-        for i in range(len(temp)):
-            if temp[i] >= 0.9:
-                count+=1
+            battery = np.array([env['battery'][i] for i in range(0, env['evNumber']) if env['evDriverType'][i]==user_type])
+        #print(len(battery))
         
-        soc_means.append(count/len(temp))
-        soc_std.append(0.0)
+        algo_name = []
+        for key in result:
+            if key == 'base_load':
+                continue
+            algo_name.append(key)
+            temp = []
+            for subKey in result[key]:
+                #if key=='central':
+                    #print(result[key][subKey]['x'])
+                if user_type==-1:
+                    value = result[key][subKey]['x']
+                else:
+                    c = result[key][subKey]['connected']
+                    l = len(c)
+                    value = [result[key][subKey]['x'][i] for i in range(0,l) if env['evDriverType'][c[i]]==user_type]
+                    '''
+                    if 'w' in result[key][subKey]:
+                        w = [result[key][subKey]['w'][i] for i in range(0,l) if env['evDriverType'][c[i]]==user_type]
+                    else:
+                        w = np.ones(len(value)).tolist()
+                    '''
+                temp.append(util.jain_index(value))
 
-    ind = np.arange(len(jain_means))  # the x locations for the groups
+            temp = np.array(temp)
+
+            jain_means.append(np.average(temp))
+            jain_std.append(np.std(temp))
+
+            if user_type==-1:
+                remaining_demand = np.array(result[key][last_slot]['remaining_demand'])
+            else:
+                remaining_demand = np.array([result[key][last_slot]['remaining_demand'][i] for i in range(0, env['evNumber']) if env['evDriverType'][i]==user_type])
+
+            #print(key)
+            #print(remaining_demand)
+
+            temp = (battery - remaining_demand)/battery
+            count = 0
+            #print(key)
+            #print(temp)
+            for i in range(len(temp)):
+                if temp[i] >= 0.9:
+                    count+=1
+            
+            soc_means.append(count/len(temp))
+            soc_std.append(0.0)
+
+        ind = np.arange(len(jain_means))  # the x locations for the groups
+        width = 0.3  # the width of the bars
+
+        if user_type == 0:
+            ax.bar(ind - width/2, jain_means, width, yerr=jain_std,
+                        label='Jain Index:Conservative', hatch='/')
+            #autolabel(rec, ax)
+            rec = ax.bar(ind - width/2, soc_means, width, yerr=soc_std,
+                         bottom=jain_means, label='% of EV:Conservative')
+            #autolabel(rec, ax)
+        else:
+            ax.bar(ind + width/2, jain_means, width, yerr=jain_std,
+                        label='Jain Index:Risk Taker', hatch='*')
+            #autolabel(rec, ax)
+            rec = ax.bar(ind + width/2, soc_means, width, yerr=soc_std,
+                         bottom=jain_means, label='% of EV:Risk Taker')
+        autolabel(rec, ax)
+
+        
+        
+        #autolabel(rects1, ax, "left")
+        #autolabel(rects2, ax, "right")
+
+    # Add some text for labels, title and custom x-axis tick labels, etc.
+    ax.set_ylabel('Values')
+    '''
+    if user_type==-1:
+        ax.set_title('Performances for all EVs')
+    elif user_type==0:
+        ax.set_title('Performances for Conservative EVs')
+    elif user_type==1:
+        ax.set_title('Performances for Risk-Taking EVs')
+    else:
+        ax.set_title('Performances for DishonestRisk-Taker EVs')
+    '''
+    ax.set_xticks(ind)
+    #ax.set_xticklabels(('G1', 'G2', 'G3', 'G4', 'G5'))
+    ax.set_xticklabels(algo_name)
+    ax.legend(loc='upper center', bbox_to_anchor=(0.5, 1.1),
+          ncol=5, fancybox=True, shadow=True)    
+    #fig.tight_layout()
+    plt.show()
+    #plt.savefig('compare_0_all_risk')
+'''
+def fig_compare_merge(algo_name, jain, soc):
+    for key in jain:
+        ind = np.arange(len(jain[key]['mean']))  # the x locations for the groups
+        break
+
     width = 0.35  # the width of the bars
 
     fig, ax = plt.subplots()
+    for key in jain:
     rects1 = ax.bar(ind - width/2, jain_means, width, yerr=jain_std,
                     label='Jain Index', hatch='/')
     rects2 = ax.bar(ind + width/2, soc_means, width, yerr=soc_std,
-                    label='% of EV with\n $\geq$90% SoC')
+                    bottom=jain_means, label='% of EV with\n $\geq$90% SoC')
 
     # Add some text for labels, title and custom x-axis tick labels, etc.
     ax.set_ylabel('Values')
@@ -250,10 +311,9 @@ def fig_compare(result_path, user_type, last_slot, env):
 
     fig.tight_layout()
 
-    #plt.show()
-    plt.savefig('compare_0_all_risk')
-
-
+    plt.show()
+    #plt.savefig('compare_0_all_risk')
+'''
 def fig_soc_vs_time(result_path, usr_type, algo, slot=60):
     result = util.load_dict(result_path)
     x = []
@@ -324,6 +384,6 @@ if __name__ == '__main__':
     #fig_soc_vs_time(simu_params['save_path'], (env['evDriverType']), algo='central')
     #fig_trans_load_vs_time(simu_params['save_path'], trans=0, env=env)
     #fig_trans_load_subplot(simu_params['save_path'], trans_list=[2,1,0], env=env)
-    fig_compare(simu_params['save_path'], 1, 143, env)
+    fig_compare(simu_params['save_path'], 143, env)
     #fig_conv_ana('result/meta_large.txt')
 

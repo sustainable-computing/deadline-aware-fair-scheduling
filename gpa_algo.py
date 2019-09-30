@@ -39,7 +39,7 @@ class gpa_algo(algo):
             #gamma = (2.0*self.params['step_factor'])/(m*L*S+util.tol)
             #gamma = 0.00060483158055174284
             
-            gamma = 0.001
+            gamma = 0.008
             #print('gamma')
             #print(gamma)
             #lamda = np.zeros(len(A))

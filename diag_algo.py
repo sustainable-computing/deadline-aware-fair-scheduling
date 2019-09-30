@@ -29,16 +29,16 @@ class diag_algo(algo):
     def get_mu(self, mu_k, mu_k_1, load_k, load_k_1, nabla_k, rating_load, gamma=None):
         #rating_load = nabla_k / (mu_k+tol)
         #hessian = np.absolute(rating_load - 2 * mu_k * ((load_k-load_k_1)/util.non_zero((mu_k-mu_k_1+0.5))))
-        hessian =  0.001 + np.absolute( ( (load_k-load_k_1)/util.non_zero((mu_k-mu_k_1)) ) )
+        hessian =  0.000001 + gamma * np.absolute( ( (load_k-load_k_1)/util.non_zero((mu_k-mu_k_1)) ) )
         #print(hessian)
         #hessian = np.array([util.tol if e <= util.tol else e for e in hessian])
-        hessian = 0.002 / util.non_zero(hessian) 
+        hessian = 1.0 / util.non_zero(hessian) 
         if gamma==None: 
             #mu = mu_k - hessian * nabla_k
             mu = np.maximum(0.0, mu_k - hessian * nabla_k )
         else:
             #mu = rating_load - 2 * mu_k * ((load_k-load_k_1)/(mu_k-mu_K_1))
-            mu = mu_k - gamma * hessian * nabla_k
+            mu = np.maximum(0.0, mu_k - gamma * hessian * nabla_k)
         return mu
     def update(self, P, Q, central={}):
 
@@ -77,7 +77,7 @@ class diag_algo(algo):
             
             gamma = 0.008
 
-            mu_k_1 = 10000*np.ones(len(A))
+            mu_k_1 = 1000*np.ones(len(A))
             load_k_1 = np.zeros(len(A))
         
             mu_k = 999*np.ones(len(A))
@@ -93,7 +93,7 @@ class diag_algo(algo):
             for i in range(0, self.params['max_iter']):
             #for i in range(0, 40):
                 n_iter = i+1
-                mu = self.get_mu(mu_k, mu_k_1, load_k, load_k_1, nabla_k, rating_load)
+                mu = self.get_mu(mu_k, mu_k_1, load_k, load_k_1, nabla_k, rating_load, gamma)
 
                 load_k_1 = np.copy(load_k)
                 mu_k_1 = np.copy(mu_k)
@@ -102,7 +102,7 @@ class diag_algo(algo):
                 x *= self.max_rate_scaler
                 
                 mu_k = np.copy(mu)
-                print(mu_k)
+                #print(mu_k)
 
                 #x = np.minimum(np.maximum(LB, w/util.non_zero( np.dot(T.T, lamda) )), self.get_UB(connected))
 
