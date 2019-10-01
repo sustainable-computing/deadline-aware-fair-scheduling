@@ -138,7 +138,7 @@ def fig_trans_load_subplot(result_path, trans_list, env):
     plt.show()
     #plt.savefig('trans1.png')
 
-def autolabel(rects, ax, xpos='center'):
+def autolabel(rects, ax, xpos='center', h_offset=0):
     """
     Attach a text label above each bar in *rects*, displaying its height.
 
@@ -146,34 +146,36 @@ def autolabel(rects, ax, xpos='center'):
     the bar. It can be one of the following {'center', 'right', 'left'}.
     """
 
-    #ha = {'center': 'center', 'right': 'left', 'left': 'right'}
+    ha = {'center': 'center', 'right': 'left', 'left': 'right'}
     
-    #offset = {'center': 0, 'right': 1, 'left': -1}
+    offset = {'center': 0, 'right': 1, 'left': -1}
     
     labels = ["{}".format(round(i.get_height(),2)) for i in rects]
     #print(labels)
-    
+    '''
     for rect, label in zip(rects, labels):
         height = round(rect.get_height(), 2)
         ax.text(rect.get_x() + rect.get_width() / 2, height + 10, label,
-                ha='center', va='top')
+                color='red', fontweight='bold', ha='center', va='top')
     '''
+    
     for rect in rects:
         height = round(rect.get_height(), 2)
         ax.annotate('{}'.format(height),
-                    xy=(rect.get_x() + rect.get_width() / 2, height),
-                    xytext=(offset[xpos]*3, offset[xpos]*height),  # use 3 points offset
+                    xy=(rect.get_x() + rect.get_width() / 2, height+h_offset),
+                    xytext=(offset[xpos]*3, 10),  # use 3 points offset
                     textcoords="offset points",  # in both directions
-                    ha=ha[xpos], va='bottom')
-    '''
+                    ha=ha[xpos], va='center')
+    return height
 
 def fig_compare(result_path, last_slot, env):
+    output = {}
     result = util.load_dict(result_path)
     #men_means, men_std = (20, 35, 30, 35, 27), (2, 3, 4, 1, 2)
     #women_means, women_std = (25, 32, 34, 20, 25), (3, 5, 2, 3, 3)
     fig, ax = plt.subplots()
     for user_type in [0,1]:
-
+        output[user_type] = {}
         jain_means = []
         jain_std = []
         
@@ -190,7 +192,10 @@ def fig_compare(result_path, last_slot, env):
         for key in result:
             if key == 'base_load':
                 continue
+                
+            output[user_type][key] = {}
             algo_name.append(key)
+                
             temp = []
             for subKey in result[key]:
                 #if key=='central':
@@ -210,7 +215,7 @@ def fig_compare(result_path, last_slot, env):
                 temp.append(util.jain_index(value))
 
             temp = np.array(temp)
-
+            output[user_type][key]['jain'] = (np.average(temp), np.std(temp))
             jain_means.append(np.average(temp))
             jain_std.append(np.std(temp))
 
@@ -227,9 +232,10 @@ def fig_compare(result_path, last_slot, env):
             #print(key)
             #print(temp)
             for i in range(len(temp)):
-                if temp[i] >= 0.9:
+                if temp[i] >= 0.95:
                     count+=1
             
+            output[user_type][key]['soc'] = (count/len(temp), 0.0)
             soc_means.append(count/len(temp))
             soc_std.append(0.0)
 
@@ -237,19 +243,19 @@ def fig_compare(result_path, last_slot, env):
         width = 0.3  # the width of the bars
 
         if user_type == 0:
-            ax.bar(ind - width/2, jain_means, width, yerr=jain_std,
+            rec = ax.bar(ind - width/2, jain_means, width, yerr=jain_std,
                         label='Jain Index:Conservative', hatch='/')
-            #autolabel(rec, ax)
+            h_offset = autolabel(rec, ax)
             rec = ax.bar(ind - width/2, soc_means, width, yerr=soc_std,
                          bottom=jain_means, label='% of EV:Conservative')
-            #autolabel(rec, ax)
+            autolabel(rec, ax, h_offset=h_offset)
         else:
-            ax.bar(ind + width/2, jain_means, width, yerr=jain_std,
+            rec = ax.bar(ind + width/2, jain_means, width, yerr=jain_std,
                         label='Jain Index:Risk Taker', hatch='*')
-            #autolabel(rec, ax)
+            h_offset = autolabel(rec, ax)
             rec = ax.bar(ind + width/2, soc_means, width, yerr=soc_std,
                          bottom=jain_means, label='% of EV:Risk Taker')
-        autolabel(rec, ax)
+            autolabel(rec, ax, h_offset=h_offset)
 
         
         
@@ -274,7 +280,9 @@ def fig_compare(result_path, last_slot, env):
     ax.legend(loc='upper center', bbox_to_anchor=(0.5, 1.1),
           ncol=5, fancybox=True, shadow=True)    
     #fig.tight_layout()
-    plt.show()
+    #plt.show()
+    print(output)
+    util.save_dict('data.txt', output)
     #plt.savefig('compare_0_all_risk')
 '''
 def fig_compare_merge(algo_name, jain, soc):
