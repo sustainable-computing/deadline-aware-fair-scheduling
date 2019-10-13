@@ -111,8 +111,8 @@ class algo:
         return self.trans_accu*np.maximum(0.0, np.array(self.env['transRating']) - trans_loads)/self.max_rate_scaler
     
     def get_UB(self, connected):
-        #temp = np.minimum(self.remaining_demand/self.slot_len_in_min, self.max_rate)
-        temp = self.max_rate
+        temp = np.minimum(self.remaining_demand/self.slot_len_in_min, self.max_rate)
+        #temp = self.max_rate
         #temp = np.maximum(util.tol, temp)
         return np.array([temp[e] for e in connected])
         

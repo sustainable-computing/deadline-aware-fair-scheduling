@@ -135,27 +135,31 @@ def get_mu(mu_k, load_k, load_k_1, nabla_k, nabla_k_1, gamma=None):
 def get_mu(mu_k, mu_k_1, load_k, load_k_1, nabla_k, rating_load, gamma=None):
     #rating_load = nabla_k / (mu_k+tol)
     #hessian = rating_load - 2 * mu_k * ((load_k-load_k_1)/util.non_zero((mu_k-mu_k_1+tol)))
-    hessian = 0.001 + gamma * np.absolute((load_k-load_k_1) / util.non_zero(mu_k-mu_k_1))
+    delta = 0.00001
+    hessian = (load_k-load_k_1) / util.non_zero(mu_k-mu_k_1)
     #hessian = np.array([util.tol if e <= util.tol else e for e in hessian])
-    hessian = 1.0 / util.non_zero(hessian) 
+     
+    hessian = np.maximum(delta, hessian)
+    hessian = 0.001 / hessian 
     if gamma==None: 
         #mu = mu_k - hessian * nabla_k
-        #mu = np.maximum(0.0, mu_k - hessian * nabla_k)
-        mu = np.abs(mu_k - hessian * nabla_k)
+        mu = np.maximum(0.0, mu_k - hessian * nabla_k)
+        #mu = np.abs(mu_k - hessian * nabla_k)
     else:
         #mu = rating_load - 2 * mu_k * ((load_k-load_k_1)/(mu_k-mu_K_1))
         #mu = mu_k - gamma * hessian * nabla_k
+        #mu = np.maximum(0.0, mu_k - gamma * hessian * nabla_k)
         mu = np.maximum(0.0, mu_k - gamma * hessian * nabla_k)
     return mu
 
 T, A, U = get_TAU()
-scale = 1e-4
+scale = 1e-3
 legend = []
 
-for name in ['diag', 'gpa']:
+for name in ['diag','gpa']:
     gammas = []
     iters = []
-    for gamma in tqdm(range(5, 100)):
+    for gamma in tqdm(range(5, 25)):
         gammas.append(gamma)
         #rho = 1.0 / (gamma*scale)
         n_iter = 0
@@ -164,16 +168,16 @@ for name in ['diag', 'gpa']:
         #y_k = np.zeros(len(A))
         #lamda_k = np.ones(len(A))
 
-        lamda = 100*np.ones(len(A))
+        lamda = 9*np.ones(len(A))
         x = np.zeros(len(connected))
         LB = np.zeros(len(connected))
 
         if name == 'diag':
             ##################################################################
-            mu_k_1 = 101*np.ones(len(A))
+            mu_k_1 = 100*np.ones(len(A))
             load_k_1 = np.zeros(len(A))
         
-            mu_k = 100*np.ones(len(A))
+            mu_k = 99*np.ones(len(A))
         
             (load_k, nabla_k, _, rating_load) = get_load_nabla(T,A,U,LB,mu_k)
             #lamda_k_1 = np.zeros(len(lamda))
@@ -307,7 +311,14 @@ for name in ['diag', 'gpa']:
 
 plt.legend(legend)
 plt.title('95% Convergence Analysis of Decentral Algo')
-plt.xlabel('step-size ($x10^{-4}$)')
+plt.xlabel('step-size ($x10^{-3}$)')
 plt.ylabel('# of iterations')
+plt.yticks([1,52],[1,52])
+fig = plt.gcf()
+fig.set_size_inches(5,3)
+#plt.figure(figsize=(4,3))
+#axes = plt.gca()
+#axes.set_xlim([xmin,xmax])
+#axes.set_ylim([1,52])
 
 plt.show()

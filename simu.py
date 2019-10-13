@@ -74,7 +74,7 @@ for key in simu_params['algo']:
          obj = admm_algo(DSSObj, env, P, Q, start_hr=simu_params['start_hr'], slot_len_in_min=simu_params['slot_len'], mode=simu_params['mode'], params=simu_params['algo'][key]['params'])
 
     elif key=='base_load':
-         obj = base_load_algo(DSSObj, env, P, Q, start_hr=simu_params['start_hr'], slot_len_in_min=simu_params['slot_len'], mode=simu_params['mode'], params=simu_params['algo'][key]['params'])
+         obj = base_load_algo(DSSObj, env, P, Q, start_hr=simu_params['start_hr'], slot_len_in_min=simu_params['slot_len'], mode=simu_params['mode'])
 
     elif key=='llf' or key=='edf':
          obj = base_line_algo(DSSObj, env, P, Q, start_hr=simu_params['start_hr'], slot_len_in_min=simu_params['slot_len'], mode=simu_params['mode'], params=simu_params['algo'][key]['params'])

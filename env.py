@@ -28,14 +28,14 @@ var['evNodeNumber'] = evNodeNumber.tolist()
 #X Type 2: dishonest risk-taker: claimed duration = actual duration - std(45 min)
 #evDriverType = np.random.randint(0, 3, evNumber)
 
-evDriverType = np.random.randint(0, 2, evNumber)
-#evDriverType = np.zeros(evNumber, dtype=int)
+#evDriverType = np.random.randint(0, 2, evNumber)
+evDriverType = np.zeros(evNumber, dtype=int)
 #evDriverType = np.ones(evNumber, dtype=int)
 var['evDriverType'] = evDriverType.tolist()
 
 # Std for type: 0, 1, 2
 #evDriverStd = [1.0, 0.20, 0.45]
-evDriverStd = [1.0, 1.0]
+evDriverStd = [3.0, 3.0]
 
 
 # GMMs for arrival times

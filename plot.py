@@ -42,7 +42,7 @@ def fig_trans_load_vs_time(result_path, trans, env=None):
     #fig.add_subplot(221)
     linewidth=1.0
     legend = []
-    y = 30*np.ones(len(x))
+    y = 100*np.ones(len(x))
     
     legend.append('max')
     plt.plot(x,y,'--',linewidth=linewidth)
@@ -135,8 +135,8 @@ def fig_trans_load_subplot(result_path, trans_list, env):
         #plt.yticks([])
         
         ii += 1
-    plt.show()
-    #plt.savefig('trans1.png')
+    #plt.show()
+    plt.savefig('trans210.png')
 
 def autolabel(rects, ax, xpos='center', h_offset=0):
     """
@@ -390,8 +390,8 @@ if __name__ == '__main__':
     env = util.load_dict(simu_params['env_path'])
     
     #fig_soc_vs_time(simu_params['save_path'], (env['evDriverType']), algo='central')
-    #fig_trans_load_vs_time(simu_params['save_path'], trans=0, env=env)
+    fig_trans_load_vs_time(simu_params['save_path'], trans=0, env=env)
     #fig_trans_load_subplot(simu_params['save_path'], trans_list=[2,1,0], env=env)
-    fig_compare(simu_params['save_path'], 143, env)
+    #fig_compare(simu_params['save_path'], 143, env)
     #fig_conv_ana('result/meta_large.txt')
 

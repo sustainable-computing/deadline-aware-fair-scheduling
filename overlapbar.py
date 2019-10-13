@@ -7,6 +7,46 @@ import plot
 data = util.load_dict('data.txt')
 algos = [key for key in data[0]]
 
+w = 0.6
+a = 3.0
+u = 1.0
+ind = []
+x_ind = []
+for i in range(0, len(algos)):
+    ind.append(a*i+1)
+    x_ind.append(a*i+(u+2)/2)
+ind = np.array(ind)
+
+color = [['forestgreen', 'lightyellow'], ['firebrick', 'mistyrose']]
+symbol = [['','/'], ['\\','-']]
+label = [['Jain Index:Conservative','EV %:Conservative'], ['Jain Index:Risk Taker','EV %:Risk Taker']]
+
+fig = plt.figure()
+ax = fig.add_subplot(111)
+
+metric_index = {'jain':0, 'soc':1}
+
+for usr in [0,1]:
+    for metric in ['jain','soc']:
+        mean = []
+        for algo in algos:
+            mean.append(data[usr][algo][metric][0])
+
+        rec = ax.bar(ind + u*usr + 0.25*metric_index[metric], mean, w, color=color[usr][metric_index[metric]], align='center', hatch=symbol[usr][metric_index[metric]], 
+        label=label[usr][metric_index[metric]])
+        plot.autolabel(rec, ax)
+
+plt.xticks(x_ind, algos)
+ax.yaxis.set_ticks_position("left")
+ax.set_ylabel('Values')
+ax.legend(loc='upper center', bbox_to_anchor=(0.5, 1.15),
+          ncol=2, fancybox=True, shadow=True) 
+#ax2.yaxis.set_ticks_position("left")
+
+#plt.tight_layout()
+plt.show()
+sys.exit()        
+            
 jain_mean = []
 jain_std = []
 soc_mean = []
@@ -31,16 +71,10 @@ for algo in algos:
 
 #color = np.array(color)
 
-ind = []
-for i in range(1, len(algos)+1):
-    ind.append(3*i-2)
-    ind.append(3*i-1)
-ind = np.array(ind)
 
 x_ind = [0.05+(ind[i]+ind[i+1])/2.0 for i in range(0, len(ind), 2)]
 
-fig = plt.figure()
-ax = fig.add_subplot(111)
+
 
 
 #ax2 = ax.twinx()
@@ -52,8 +86,9 @@ plot.autolabel(rec, ax)
 plt.xticks(x_ind, algos)
 ax.yaxis.set_ticks_position("left")
 ax.set_ylabel('Values')
-ax.legend(loc='upper center', bbox_to_anchor=(0.5, 1.1),
-          ncol=5, fancybox=True, shadow=True) 
+ax.legend(#loc='upper center', 
+          bbox_to_anchor=(0.5, 1.1),
+          ncol=2, handleheight=2.4, fancybox=True, shadow=True) 
 #ax2.yaxis.set_ticks_position("left")
 
 plt.tight_layout()

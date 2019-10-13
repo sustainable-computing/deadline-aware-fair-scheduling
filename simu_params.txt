@@ -1,7 +1,7 @@
 {
-'env_path':'env/test_500.txt',
+'env_path':'env/mix_500.txt',
 
-'save_path':'result/test_500.txt',
+'save_path':'result/mix_500.txt',
 
 'base_load_path':'base_load/10_min/',
 
@@ -17,14 +17,14 @@
 
 'central':{'type':'central_algo', 'params':{'theta':0.8}},
 
-'diag':{'type':'decentral_algo', 'params':{'tol':0.05, 'max_iter':30}},
+'diag':{'type':'decentral_algo', 'params':{'tol':0.05, 'max_iter':100}},
 
-'gpa':{'type':'decentral_algo', 'params':{'tol':0.05, 'max_iter':30}},
+'gpa':{'type':'decentral_algo', 'params':{'tol':0.05, 'max_iter':100}},
 
-'llf':{'type':'baseline_algo', 'params':{'value':'llf', 'tol':0.05, 'max_iter':30}},
+'llf':{'type':'baseline_algo', 'params':{'value':'edf', 'tol':0.05, 'max_iter':100}},
 
-'edf':{'type':'baseline_algo', 'params':{'value':'edf', 'tol':0.05, 'max_iter':30}},
+'edf':{'type':'baseline_algo', 'params':{'value':'edf', 'tol':0.05, 'max_iter':100}},
 
-'base_load':{'type':'base_load_algo', 'params':{}}
+'base_load':{'type':'baseload_algo'}
 }
 }

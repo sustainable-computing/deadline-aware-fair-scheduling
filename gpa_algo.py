@@ -39,11 +39,11 @@ class gpa_algo(algo):
             #gamma = (2.0*self.params['step_factor'])/(m*L*S+util.tol)
             #gamma = 0.00060483158055174284
             
-            gamma = 0.008
+            gamma = 0.0008
             #print('gamma')
             #print(gamma)
             #lamda = np.zeros(len(A))
-            lamda = 999*np.ones(len(A))
+            lamda = np.ones(len(A))
             #print(np.dot(T.T, lamda))
             x = np.zeros(len(connected))
             
@@ -62,6 +62,7 @@ class gpa_algo(algo):
                   
 
                 lamda = np.maximum(0.0, lamda - gamma*g)
+                print(lamda)
 
                 #if np.allclose(self.get_trans_load(ev_power,P,Q), central['trans_load'], atol=0.0, rtol=self.params['tol'])==True:
                 #    break
