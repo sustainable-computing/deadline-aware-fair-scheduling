@@ -61,22 +61,22 @@ for key in simu_params['algo']:
     if simu_params['algo'][key]['type']=='decentral_algo':
         decentral_list.append(key)
 
-    if key=='central':
+    if key=='Central':
          obj = central_algo(DSSObj, env, P, Q, start_hr=simu_params['start_hr'], slot_len_in_min=simu_params['slot_len'], mode=simu_params['mode'], params=simu_params['algo'][key]['params'])
 
-    elif key=='gpa':
+    elif key=='GPA':
          obj = gpa_algo(DSSObj, env, P, Q, start_hr=simu_params['start_hr'], slot_len_in_min=simu_params['slot_len'], mode=simu_params['mode'], params=simu_params['algo'][key]['params'])
          
-    elif key=='diag':
+    elif key=='SGPA':
          obj = diag_algo(DSSObj, env, P, Q, start_hr=simu_params['start_hr'], slot_len_in_min=simu_params['slot_len'], mode=simu_params['mode'], params=simu_params['algo'][key]['params'])
          
     elif key=='admm':
          obj = admm_algo(DSSObj, env, P, Q, start_hr=simu_params['start_hr'], slot_len_in_min=simu_params['slot_len'], mode=simu_params['mode'], params=simu_params['algo'][key]['params'])
 
-    elif key=='base_load':
+    elif key=='Base Load':
          obj = base_load_algo(DSSObj, env, P, Q, start_hr=simu_params['start_hr'], slot_len_in_min=simu_params['slot_len'], mode=simu_params['mode'])
 
-    elif key=='llf' or key=='edf':
+    elif key=='LLF' or key=='EDF':
          obj = base_line_algo(DSSObj, env, P, Q, start_hr=simu_params['start_hr'], slot_len_in_min=simu_params['slot_len'], mode=simu_params['mode'], params=simu_params['algo'][key]['params'])
 
     algo_list[key] = obj
@@ -104,9 +104,9 @@ for h in tqdm(range(simu_params['start_hr'], simu_params['end_hr'])):
             index = h*n_slots + t
             result[key][index] = algo_list[key].update(P,Q)
 
-            if key == 'central' and decentral_flag==True:
+            if key == 'Central' and decentral_flag==True:
                 for dli in decentral_list:
-                    result[dli][index] = algo_list[dli].update(P,Q, result['central'][index])
+                    result[dli][index] = algo_list[dli].update(P,Q, result['Central'][index])
 
 """
 'decentral':{'type':'decentral_algo', 'params':{'x':True, 'theta':0.8, 'step_factor':200, 'tol':0.05, 'max_iter':200}},

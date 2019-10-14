@@ -6,6 +6,7 @@ from matplotlib.ticker import (MultipleLocator, FuncFormatter)
 
 def format_func(value, tick_number):
     t = int(value//6)
+    return str(t) + ":00"
     if t==2 or t==4 or t==6 or t==8 or t==10:
         return str(t) + ":00 am"
     if t==0:
@@ -83,10 +84,15 @@ def fig_trans_load_subplot(result_path, trans_list, env):
     x = np.array(x)
     x = np.sort(x)
     
+    plt.rcParams.update({'font.size': 24})
     fig, ax = plt.subplots(sharex=True, sharey=True)
-    ax.tick_params(labelcolor='w', top='off', bottom='off', left='off', right='off')
-    ax.set_xlabel('Time')
-    ax.set_ylabel('kVA')
+    
+    #ax.tick_params(labelcolor='w', top='off', bottom='off', left='off', right='off')
+    #ax.yaxis.set_ticks_position('left')
+    ax.yaxis.set_ticks([])
+    ax.xaxis.set_ticks([])
+    ax.set_xlabel('\nTime')
+    ax.set_ylabel('MVA\n')
 
     #fig.add_subplot(221)
     linewidth=1.0
@@ -96,47 +102,50 @@ def fig_trans_load_subplot(result_path, trans_list, env):
         ax = fig.add_subplot(len(trans_list), 1, ii)
         
         if trans==0:
-            ax.xaxis.set_major_locator(MultipleLocator(6))
+            ax.xaxis.set_major_locator(MultipleLocator(24))
             ax.xaxis.set_major_formatter(FuncFormatter(format_func))
 
-            ax.xaxis.set_minor_locator(MultipleLocator(1))
+            ax.xaxis.set_minor_locator(MultipleLocator(12))
         else:
             ax.get_xaxis().set_visible(False)
 
-        y = 3*env['transRating'][3*trans]*np.ones(len(x))
         
         legend = []
-        legend.append('rating')
-        plt.plot(x,y,'--',linewidth=linewidth)
-
+        #legend.append('')
+        
         for key in result:
-            if key=='llf' or key=='edf':
+            if key=='LLF' or key=='EDF':
                 continue
             y = []
             legend.append(key)
             for i in x:
                 y.append(result[key][i]['trans_load'][(3 * trans + 0)] + result[key][i]['trans_load'][(3 * trans + 1)] + result[key][i]['trans_load'][(3 * trans + 2)])
 
-            y = np.array(y)
-            if key=='base_load':
+            y = np.array(y)/1000
+            if key=='Base Load':
                 plt.plot(x, y,linewidth=linewidth, alpha=0.3)
             else:
                 plt.plot(x, y,linewidth=linewidth)
         if ii == 1:
+            #plt.legend()
+            #plt.legend(legend, loc='upper left')
             plt.legend(legend)
-        
+        '''
         if trans==0:
             plt.title('Substation Loading')
         else:
             plt.title('Transformer (#'+ str(trans)+')'+' Loading')
-        
-     
-        plt.xticks(rotation=30)
+        '''
+        y = 3*env['transRating'][3*trans]*np.ones(len(x))/1000
+        plt.plot(x,y,'--',linewidth=linewidth)
+
+        #plt.xticks(rotation=30)
         #plt.yticks([])
         
         ii += 1
-    #plt.show()
-    plt.savefig('trans210.png')
+   
+    plt.show()
+    #plt.savefig('trans210.png')
 
 def autolabel(rects, ax, xpos='center', h_offset=0):
     """
@@ -151,6 +160,7 @@ def autolabel(rects, ax, xpos='center', h_offset=0):
     offset = {'center': 0, 'right': 1, 'left': -1}
     
     labels = ["{}".format(round(i.get_height(),2)) for i in rects]
+    #labels = ['' if e=='1.0' else e for e in labels]
     #print(labels)
     '''
     for rect, label in zip(rects, labels):
@@ -161,7 +171,10 @@ def autolabel(rects, ax, xpos='center', h_offset=0):
     
     for rect in rects:
         height = round(rect.get_height(), 2)
-        ax.annotate('{}'.format(height),
+        height_str = '{}'.format(height)
+        if height_str=='1.0':
+            height_str = ''
+        ax.annotate(height_str,
                     xy=(rect.get_x() + rect.get_width() / 2, height+h_offset),
                     xytext=(offset[xpos]*3, 10),  # use 3 points offset
                     textcoords="offset points",  # in both directions
@@ -174,7 +187,7 @@ def fig_compare(result_path, last_slot, env):
     #men_means, men_std = (20, 35, 30, 35, 27), (2, 3, 4, 1, 2)
     #women_means, women_std = (25, 32, 34, 20, 25), (3, 5, 2, 3, 3)
     fig, ax = plt.subplots()
-    for user_type in [0,1]:
+    for user_type in [1]:
         output[user_type] = {}
         jain_means = []
         jain_std = []
@@ -190,7 +203,7 @@ def fig_compare(result_path, last_slot, env):
         
         algo_name = []
         for key in result:
-            if key == 'base_load':
+            if key == 'Base Load':
                 continue
                 
             output[user_type][key] = {}
@@ -232,7 +245,7 @@ def fig_compare(result_path, last_slot, env):
             #print(key)
             #print(temp)
             for i in range(len(temp)):
-                if temp[i] >= 0.95:
+                if temp[i] >= 0.9:
                     count+=1
             
             output[user_type][key]['soc'] = (count/len(temp), 0.0)
@@ -282,7 +295,7 @@ def fig_compare(result_path, last_slot, env):
     #fig.tight_layout()
     #plt.show()
     print(output)
-    util.save_dict('data.txt', output)
+    util.save_dict('data_risk_taker.txt', output)
     #plt.savefig('compare_0_all_risk')
 '''
 def fig_compare_merge(algo_name, jain, soc):
@@ -390,8 +403,8 @@ if __name__ == '__main__':
     env = util.load_dict(simu_params['env_path'])
     
     #fig_soc_vs_time(simu_params['save_path'], (env['evDriverType']), algo='central')
-    fig_trans_load_vs_time(simu_params['save_path'], trans=0, env=env)
-    #fig_trans_load_subplot(simu_params['save_path'], trans_list=[2,1,0], env=env)
-    #fig_compare(simu_params['save_path'], 143, env)
+    #fig_trans_load_vs_time(simu_params['save_path'], trans=0, env=env)
+    #fig_trans_load_subplot(simu_params['save_path'], trans_list=[1,0], env=env)
+    fig_compare(simu_params['save_path'], 143, env)
     #fig_conv_ana('result/meta_large.txt')
 

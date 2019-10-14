@@ -30,13 +30,14 @@ class diag_algo(algo):
     def get_mu(self, mu_k, mu_k_1, load_k, load_k_1, nabla_k, rating_load, gamma=None):
         #rating_load = nabla_k / (mu_k+tol)
         #hessian = np.absolute(rating_load - 2 * mu_k * ((load_k-load_k_1)/util.non_zero((mu_k-mu_k_1+0.5))))
-        hessian = (load_k-load_k_1)/util.non_zero((mu_k-mu_k_1))
-        delta = 0.0000001 
+        delta = 0.0000001
+        hessian = np.absolute((load_k-load_k_1)/util.non_zero((mu_k-mu_k_1)))
+         
         hessian = np.maximum(delta, hessian)
         #print(hessian)
         #hessian = np.array([util.tol if e <= util.tol else e for e in hessian])
         hessian = 1.0 / hessian
-        print(hessian) 
+        #print(hessian) 
         if gamma==None: 
             #mu = mu_k - hessian * nabla_k
             mu = np.maximum(0.0, mu_k - hessian * nabla_k )
@@ -79,12 +80,15 @@ class diag_algo(algo):
             #gamma = (2.0*self.params['step_factor'])/(m*L*S+util.tol)
             #gamma = 0.00060483158055174284
             
-            gamma = 0.00008
+            gamma = 0.08
 
-            mu_k_1 = 100*np.ones(len(A))
-            load_k_1 = 99*np.ones(len(A))
+            mu_k_1 = 0*np.ones(len(A))
+            #mu_k_1 = np.random.rand(len(A))
+            load_k_1 = np.ones(len(A))
+            #load_k_1 = 10*np.random.rand(len(A))
         
-            mu_k = 99*np.ones(len(A))
+            mu_k = 1*np.ones(len(A))
+            #mu_k = np.random.rand(len(A))
         
             (load_k, nabla_k, _, rating_load) = self.get_load_nabla(T,A,U,LB,UB,connected,P,Q,w,mu_k)
             #print('gamma')
@@ -106,7 +110,7 @@ class diag_algo(algo):
                 x *= self.max_rate_scaler
                 
                 mu_k = np.copy(mu)
-                print(mu_k)
+                #print(mu_k)
 
                 #x = np.minimum(np.maximum(LB, w/util.non_zero( np.dot(T.T, lamda) )), self.get_UB(connected))
 

@@ -1,10 +1,11 @@
 import numpy as np
+#import matplotlib
 import matplotlib.pyplot as plt
 import utility as util
 import sys
 import plot
 
-data = util.load_dict('data.txt')
+data = util.load_dict('data_conservative_risk_taker.txt')
 algos = [key for key in data[0]]
 
 w = 0.6
@@ -19,7 +20,8 @@ ind = np.array(ind)
 
 color = [['forestgreen', 'lightyellow'], ['firebrick', 'mistyrose']]
 symbol = [['','/'], ['\\','-']]
-label = [['Jain Index:Conservative','EV %:Conservative'], ['Jain Index:Risk Taker','EV %:Risk Taker']]
+label = [['Jain Index:All Conservative','EV %:All Conservative'], ['Jain Index:All Risk Taker','EV %:All Risk Taker']]
+plt.rcParams.update({'font.size': 16})
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
@@ -39,13 +41,29 @@ for usr in [0,1]:
 plt.xticks(x_ind, algos)
 ax.yaxis.set_ticks_position("left")
 ax.set_ylabel('Values')
-ax.legend(loc='upper center', bbox_to_anchor=(0.5, 1.15),
+ax.legend(loc='upper center', bbox_to_anchor=(0.5, 1.16),
           ncol=2, fancybox=True, shadow=True) 
 #ax2.yaxis.set_ticks_position("left")
 
 #plt.tight_layout()
+#matplotlib.rcParams.update({'font.size': 24})
+SMALL_SIZE = 8
+MEDIUM_SIZE = 10
+BIGGER_SIZE = 24
+
+'''
+plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
+plt.rc('axes', titlesize=BIGGER_SIZE)     # fontsize of the axes title
+plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
+plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
+plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
+'''
 plt.show()
+
 sys.exit()        
+
             
 jain_mean = []
 jain_std = []
@@ -92,6 +110,7 @@ ax.legend(#loc='upper center',
 #ax2.yaxis.set_ticks_position("left")
 
 plt.tight_layout()
+
 plt.show()
 '''
 from pychartdir import *

@@ -13,9 +13,9 @@ i = 1
 print(str(i).zfill(5))
 sys.exit()
 '''
-result_path = 'result/test_500.txt'
+result_path = 'result/mix_500.txt'
 base_load_path = 'base_load/10_min/'
-env_path = 'env/test_500.txt'
+env_path = 'env/mix_500.txt'
 
 DSSObj = DSSStartup.dssstartup('master33Full.dss')
 
@@ -27,7 +27,7 @@ env = util.load_dict(env_path)
 slot = 140
 rho = 1000.0
 #print(result['central'][slot]['x'])
-connected = result['central'][slot]['connected']
+connected = result['Central'][slot]['connected']
 print('connected')
 print(len(connected))
 factor = 0.1
@@ -48,7 +48,7 @@ def get_driver_type():
     return np.array(driver_type)
     
 #w = util.f(get_driver_type())
-w = np.array(result['central'][slot]['w'])
+w = np.array(result['Central'][slot]['w'])
 
 def get_trans_load(ev_power): # In kVA
     DSSCircuit = RunPF.runPF(DSSObj, P[:, h%n_slot_per_hr], Q[:, h%n_slot_per_hr], env['evNodeNumber'], ev_power)
@@ -135,12 +135,12 @@ def get_mu(mu_k, load_k, load_k_1, nabla_k, nabla_k_1, gamma=None):
 def get_mu(mu_k, mu_k_1, load_k, load_k_1, nabla_k, rating_load, gamma=None):
     #rating_load = nabla_k / (mu_k+tol)
     #hessian = rating_load - 2 * mu_k * ((load_k-load_k_1)/util.non_zero((mu_k-mu_k_1+tol)))
-    delta = 0.00001
-    hessian = (load_k-load_k_1) / util.non_zero(mu_k-mu_k_1)
+    delta = 0.000000001
+    hessian = np.absolute((load_k-load_k_1) / util.non_zero(mu_k-mu_k_1))
     #hessian = np.array([util.tol if e <= util.tol else e for e in hessian])
      
     hessian = np.maximum(delta, hessian)
-    hessian = 0.001 / hessian 
+    hessian = 1.0 / hessian 
     if gamma==None: 
         #mu = mu_k - hessian * nabla_k
         mu = np.maximum(0.0, mu_k - hessian * nabla_k)
@@ -156,7 +156,7 @@ T, A, U = get_TAU()
 scale = 1e-3
 legend = []
 
-for name in ['diag','gpa']:
+for name in ['SGPA','GPA']:
     gammas = []
     iters = []
     for gamma in tqdm(range(5, 25)):
@@ -168,16 +168,19 @@ for name in ['diag','gpa']:
         #y_k = np.zeros(len(A))
         #lamda_k = np.ones(len(A))
 
-        lamda = 9*np.ones(len(A))
+        lamda = 10*np.ones(len(A))
         x = np.zeros(len(connected))
         LB = np.zeros(len(connected))
 
-        if name == 'diag':
+        if name == 'SGPA':
             ##################################################################
-            mu_k_1 = 100*np.ones(len(A))
-            load_k_1 = np.zeros(len(A))
+            mu_k_1 = 5*np.ones(len(A))
+            #mu_k_1 = np.random.rand(len(A))
+            load_k_1 =10*np.ones(len(A))
+            #load_k_1 = 10*np.random.rand(len(A))
         
-            mu_k = 99*np.ones(len(A))
+            mu_k = 10*np.ones(len(A))
+            #mu_k = np.random.rand(len(A))
         
             (load_k, nabla_k, _, rating_load) = get_load_nabla(T,A,U,LB,mu_k)
             #lamda_k_1 = np.zeros(len(lamda))
@@ -206,7 +209,7 @@ for name in ['diag','gpa']:
         for i in range(0, 100):
             n_iter = i+1
             
-            if name == 'diag':
+            if name == 'SGPA':
                 #lamda = lamda - util.lbfgs_get_direction(history, g_k)
                 #lamda = 2 * rating_load - 2 * lamda_k * ( ( load_k - load_k_1 ) / ( lamda_k - lamda_k_1 + 1e-7) )
                 mu = get_mu(mu_k, mu_k_1, load_k, load_k_1, nabla_k, rating_load, gamma*scale)
@@ -238,7 +241,7 @@ for name in ['diag','gpa']:
             #nabla = np.array(env['transRating']) - load
             
             #g = ( np.array(env['transRating']) - load )
-            if name=='gpa':
+            if name=='GPA':
                 g = np.array(env['transRating']) - get_trans_load(ev_power) 
                 g = np.array([g[e] for e in U])
                 #print(gamma*scale)
@@ -286,7 +289,7 @@ for name in ['diag','gpa']:
             
             '''
             
-            c = sum(result['central'][slot]['ev_power'])
+            c = sum(result['Central'][slot]['ev_power'])
             d = sum(ev_power)
 
             if abs(d-c) <= 0.05*c:
@@ -306,14 +309,14 @@ for name in ['diag','gpa']:
     
     legend.append(name)
 
-    
+    plt.rcParams.update({'font.size': 20})
     plt.plot(gammas, iters)
 
 plt.legend(legend)
-plt.title('95% Convergence Analysis of Decentral Algo')
+#plt.title('95% Convergence Analysis of Decentral Algo')
 plt.xlabel('step-size ($x10^{-3}$)')
 plt.ylabel('# of iterations')
-plt.yticks([1,52],[1,52])
+plt.yticks([4,58],[4,58])
 fig = plt.gcf()
 fig.set_size_inches(5,3)
 #plt.figure(figsize=(4,3))

@@ -28,8 +28,8 @@ var['evNodeNumber'] = evNodeNumber.tolist()
 #X Type 2: dishonest risk-taker: claimed duration = actual duration - std(45 min)
 #evDriverType = np.random.randint(0, 3, evNumber)
 
-#evDriverType = np.random.randint(0, 2, evNumber)
-evDriverType = np.zeros(evNumber, dtype=int)
+evDriverType = np.random.randint(0, 2, evNumber)
+#evDriverType = np.zeros(evNumber, dtype=int)
 #evDriverType = np.ones(evNumber, dtype=int)
 var['evDriverType'] = evDriverType.tolist()
 
@@ -79,7 +79,7 @@ var['battery'] = battery
 
 
 # Initial charge of each EV at the time connection in percentage
-evInitCharge = np.random.randint(0, 3, evNumber)
+evInitCharge = np.random.randint(0, 5, evNumber)
 #evInitCharge = 20*np.ones(evNumber)
 # Demand of each EV in kWh
 demand = np.array([(1.0-evInitCharge[e]/100.0)*batterySize[evBatteryType[e]] for e in range(0, evNumber)])
@@ -118,7 +118,6 @@ for i in range(0,3):
         evArrival.append(9)
         evClaimedDuration.append(8)
         evDuration.append(8+i*0.75)
-
 evArrival = np.array(evArrival)
 evClaimedDuration = np.array(evClaimedDuration)
 evDuration = np.array(evDuration)
@@ -133,6 +132,7 @@ var['evDuration'] = np.round(evDuration*60).tolist()
 #discp_type = [0, 2700, 3600] # In minutes
 #var['discrepancy'] = [discp_type[evDriverType[i]] for i in range(0, evNumber)] 
 discrepancy = evDuration - evClaimedDuration
+discrepancy = np.array([e+1 if e>0 else e for e in discrepancy])
 var['discrepancy'] = np.round(discrepancy*60).tolist()
 # Transformer rating for each phase in kVA
 transRating=[2500,2500,2500,100,100,100,100,100,100,100,100,100,75,75,75,75,75,75,166.67,166.67,166.67,166.67,166.67,
