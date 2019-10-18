@@ -1,7 +1,7 @@
 {
-'env_path':'env/risk_taker_500.txt',
+'env_path':'env/static.txt',
 
-'save_path':'result/risk_taker_500.txt',
+'save_path':'result/static.txt',
 
 'base_load_path':'base_load/10_min/',
 
@@ -21,7 +21,7 @@
 
 'GPA':{'type':'decentral_algo', 'params':{'tol':0.05, 'max_iter':100}},
 
-'LLF':{'type':'baseline_algo', 'params':{'value':'edf', 'tol':0.05, 'max_iter':100}},
+'LLF':{'type':'baseline_algo', 'params':{'value':'llf', 'tol':0.05, 'max_iter':100}},
 
 'EDF':{'type':'baseline_algo', 'params':{'value':'edf', 'tol':0.05, 'max_iter':100}},
 

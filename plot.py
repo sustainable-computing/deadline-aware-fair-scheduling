@@ -404,7 +404,7 @@ if __name__ == '__main__':
     
     #fig_soc_vs_time(simu_params['save_path'], (env['evDriverType']), algo='central')
     #fig_trans_load_vs_time(simu_params['save_path'], trans=0, env=env)
-    #fig_trans_load_subplot(simu_params['save_path'], trans_list=[1,0], env=env)
-    fig_compare(simu_params['save_path'], 143, env)
+    fig_trans_load_subplot(simu_params['save_path'], trans_list=[1,0], env=env)
+    #fig_compare(simu_params['save_path'], 143, env)
     #fig_conv_ana('result/meta_large.txt')
 
