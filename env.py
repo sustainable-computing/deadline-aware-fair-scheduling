@@ -88,27 +88,35 @@ var['demand'] = demand.tolist()
 # Arrival time, duration and claimed duration of each EV in hour
 evArrival = np.zeros(evNumber)
 evDuration = np.zeros(evNumber)
+estimation = np.zeros(evNumber)
 evClaimedDuration = np.zeros(evNumber)
 
-# EVs' schedules 
-for e in range(0, evNumber):
-    # Arrival time in hour
-    evArrival[e] = np.random.normal(meanArrival[evGaussian[e]], stdArrival[evGaussian[e]])%24
-    # Duration of connection in hour
-    evDuration[e] = np.random.normal(8,2)
-    if evDuration[e] < 1:
-        evDuration[e] = 1
-    elif evDuration[e] > 14:
-        evDuration[e] = 14
-    # Claimed duration in hour
-    if evDriverType[e] < 1:
-        # Conservative driver
-        evClaimedDuration[e] = evDuration[e]+abs(np.random.normal(0, evDriverStd[evDriverType[e]]))
-    else:
-        # Risk-Taker driver
-        evClaimedDuration[e] = evDuration[e]-abs(np.random.normal(0, evDriverStd[evDriverType[e]]))
-    if evClaimedDuration[e] < 1:
-        evClaimedDuration[e] = 1
+history = np.zeros(evNumber)
+for k in range(0,4):
+    # EVs' schedules 
+    for e in range(0, evNumber):
+        # Arrival time in hour
+        evArrival[e] = np.random.normal(meanArrival[evGaussian[e]], stdArrival[evGaussian[e]])%24
+        # Duration of connection in hour
+        evDuration[e] = np.random.normal(8,2)
+        if evDuration[e] < 1:
+            evDuration[e] = 1
+        elif evDuration[e] > 14:
+            evDuration[e] = 14
+        # Claimed duration in hour
+        estimation[e] = np.random.normal(evDuration[e],0.5)
+        if evDriverType[e] < 1:
+            # Conservative driver
+            evClaimedDuration[e] = estimation[e]+abs(np.random.normal(evDriverStd[evDriverType[e]], 0.5))
+        else:
+            # Risk-Taker driver
+            evClaimedDuration[e] = estimation[e]-abs(np.random.normal(evDriverStd[evDriverType[e]], 0.5))
+        if evClaimedDuration[e] < 1:
+            evClaimedDuration[e] = 1
+    if k<3:
+        discrepancy = evDuration - evClaimedDuration
+        history += discrepancy
+history /= 3.0
 """
 evArrival = []
 evClaimedDuration = []
@@ -131,9 +139,9 @@ var['evDuration'] = np.round(evDuration*60).tolist()
 # Discrepancy for different types of EV  
 #discp_type = [0, 2700, 3600] # In minutes
 #var['discrepancy'] = [discp_type[evDriverType[i]] for i in range(0, evNumber)] 
-discrepancy = evDuration - evClaimedDuration
-discrepancy = np.array([e+1 if e>0 else e for e in discrepancy])
-var['discrepancy'] = np.round(discrepancy*60).tolist()
+#discrepancy = evDuration - evClaimedDuration
+#discrepancy = np.array([e+1 if e>0 else e for e in discrepancy])
+var['discrepancy'] = np.round(history*60).tolist()
 # Transformer rating for each phase in kVA
 transRating=[2500,2500,2500,100,100,100,100,100,100,100,100,100,75,75,75,75,75,75,166.67,166.67,166.67,166.67,166.67,
 166.67,50,50,50,75,75,75,75,75,75,75,75,75,75,75,75,100,100,100,75,75,75,75,75,75,50,50,50,100,100,100,100,100,100,75,

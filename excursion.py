@@ -1,7 +1,7 @@
 import numpy as np
 import utility as util
 
-file_name = 'risk_taker_500.txt'
+file_name = 'static.txt'
 
 result_path = 'result/'+file_name
 env_path = 'env/'+file_name
@@ -9,7 +9,7 @@ env_path = 'env/'+file_name
 result = util.load_dict(result_path)
 env = util.load_dict(env_path)
 
-def excursion_for_single_time_slot(trans_load, trans=[0], time=(1/6.0)):
+def excursion_for_single_time_slot(trans_load, trans=[1], time=(1/6.0)):
     rating = np.array(env['transRating'])
     load = np.array(trans_load)
     

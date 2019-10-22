@@ -17,13 +17,13 @@
 
 'Central':{'type':'central_algo', 'params':{'theta':0.8}},
 
-'SGPA':{'type':'decentral_algo', 'params':{'tol':0.05, 'max_iter':100}},
+'SGPA':{'type':'decentral_algo', 'params':{'tol':0.05, 'max_iter':60}},
 
-'GPA':{'type':'decentral_algo', 'params':{'tol':0.05, 'max_iter':100}},
+'GPA':{'type':'decentral_algo', 'params':{'tol':0.05, 'max_iter':60}},
 
-'LLF':{'type':'baseline_algo', 'params':{'value':'llf', 'tol':0.05, 'max_iter':100}},
+'LLF':{'type':'baseline_algo', 'params':{'value':'llf', 'tol':0.05, 'max_iter':60}},
 
-'EDF':{'type':'baseline_algo', 'params':{'value':'edf', 'tol':0.05, 'max_iter':100}},
+'EDF':{'type':'baseline_algo', 'params':{'value':'edf', 'tol':0.05, 'max_iter':60}},
 
 'Base Load':{'type':'baseload_algo'}
 }

@@ -114,7 +114,7 @@ def fig_trans_load_subplot(result_path, trans_list, env):
         #legend.append('')
         
         for key in result:
-            if key=='LLF' or key=='EDF':
+            if key=='SGPA' or key=='GPA':
                 continue
             y = []
             legend.append(key)
@@ -187,7 +187,7 @@ def fig_compare(result_path, last_slot, env):
     #men_means, men_std = (20, 35, 30, 35, 27), (2, 3, 4, 1, 2)
     #women_means, women_std = (25, 32, 34, 20, 25), (3, 5, 2, 3, 3)
     fig, ax = plt.subplots()
-    for user_type in [1]:
+    for user_type in [0,1]:
         output[user_type] = {}
         jain_means = []
         jain_std = []
@@ -295,7 +295,7 @@ def fig_compare(result_path, last_slot, env):
     #fig.tight_layout()
     #plt.show()
     print(output)
-    util.save_dict('data_risk_taker.txt', output)
+    util.save_dict('data_mix_500_2.txt', output)
     #plt.savefig('compare_0_all_risk')
 '''
 def fig_compare_merge(algo_name, jain, soc):
